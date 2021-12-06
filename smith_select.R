@@ -55,14 +55,30 @@ obs_description <- fhir_table_description("Observation",
                                                    NTproBNP.unit = "valueQuantity/code",
                                                    NTproBNP.unitSystem = "valueQuantity/system"))
 
-pat_description <- fhir_table_description("Patient",
-                                          cols = c(id = "id",
-                                                   gender = "gender", 
-                                                   birthdate = "birthDate"))
+cols <- c(
+  id = "id",
+  gender = "gender",
+  birthdate = "birthDate"
+)
+if (!is.null(pat_id_system)) {
+  cols <- c(cols,
+            psn = paste0(
+              "identifier[system/@value='",
+              pat_id_system,
+              "']/value/@value"
+            ))
+}
+pat_description <- fhir_table_description("Patient", cols = cols)
 
 obs_tables <- fhir_crack(obs_bundles, 
                          design = fhir_design(obs = obs_description, pat = pat_description),
                          data.table = TRUE)
+
+if (length(unique(obs_tables$pat[["id"]])) != obs_tables$pat[, .N]) {
+  write("Es wurden mehrere Patientenressourcen mit derselben ID heruntergeladen!",
+        file = "errors/error_message.txt")
+  stop("Multiple patients with same id were found - aborting.")
+}
 
 if(nrow(obs_tables$obs)==0){
   write("Konnte keine Observations für NTproBNP auf dem Server finden. Abfrage abgebrochen.", file ="errors/error_message.txt")
@@ -72,6 +88,29 @@ if(nrow(obs_tables$obs)==0){
 if(nrow(obs_tables$pat)==0){
   write("Konnte keine Patientenressourcen für NTproBNP-Observations auf dem Server finden. Abfrage abgebrochen.", file ="errors/error_message.txt")
   stop("No Patients for NTproBNP Observations found - aborting.")
+}
+
+## Read in the list with consented psn's:
+if(!is.null(path_to_consented_pat_ids_csv)){
+  consented_ids_data <-
+    data.table::fread(file = path_to_consented_pat_ids_csv, header = FALSE)
+  consented_ids <- unique(consented_ids_data[[1]])
+
+  rm(consented_ids_data)
+  
+  # length(intersect(
+  #   x = unique(obs_tables$pat[["psn"]]),
+  #   y = unique(consented_ids)
+  # ))
+  
+  ## Keep only consented patients:
+  obs_tables$pat <- obs_tables$pat[get("psn") %in% consented_ids, ]
+  
+  ## Remove column "psn":
+  obs_tables$pat[, "psn" := NULL]
+  
+  ## Keep only observations with reference to consented patients:
+  obs_tables$obs <- obs_tables$obs[get("subject") %in% paste0("Patient/", unique(obs_tables$pat[["id"]]))]
 }
 
 ### Prepare Patient id from initial patient population for Search requests that download associated resources (e.g. consent, encounters, conditions)
