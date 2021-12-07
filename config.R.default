@@ -24,3 +24,10 @@ password <- NULL #zB "mypassword"
 # Alternativ: Token für Bearer Token Authentifizierung
 token <- NULL #zB "mytoken"
 
+### Abgefragte Profile: Bitte NULL setzen, wenn Abfrage nicht auf Profile einschränken soll
+
+#Encounter 
+enc_profile <- "&_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung"
+
+#Observation
+obs_profile <- "&_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab"

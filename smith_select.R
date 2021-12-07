@@ -34,8 +34,10 @@ obs_request <- fhir_url(url = base,
                         parameters = c("code" = "http://loinc.org|33763-4,http://loinc.org|71425-3,http://loinc.org|33762-6,http://loinc.org|83107-3,http://loinc.org|83108-1,http://loinc.org|77622-9,http://loinc.org|77621-1",
                                        "date" = "ge2019-01-01",
                                        "date" = "le2021-12-31",
-                                       "_include" = "Observation:patient",
-                                       "_profile" = "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab"))
+                                       "_include" = "Observation:patient"))
+
+#add profile from config
+obs_request <- fhir_url(paste0(obs_request, obs_profile))
 
 #download bundles
 obs_bundles <- fhir_search(request = obs_request,
@@ -190,9 +192,11 @@ encounter_list <- lapply(list, function(x){
   enc_request <- fhir_url(url = base,
                           resource = "Encounter",
                           parameters = c(subject = ids,
-                                         "_include" = "Encounter:diagnosis",
-                                         "_profile" = "https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung")
-                          )
+                                         "_include" = "Encounter:diagnosis"))
+  
+  #add profile from config
+  enc_request <- fhir_url(url = paste0(enc_request, enc_profile))
+                          
 
   enc_bundles <- fhir_search(enc_request,
                              username = username,
