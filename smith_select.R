@@ -74,6 +74,9 @@ if(nrow(obs_tables$pat)==0){
   stop("No Patients for NTproBNP Observations found - aborting.")
 }
 
+#get rid of resources that have been downloaded multiple times via _include
+obs_tables$pat <- unique(obs_tables$pat)
+
 ### Prepare Patient id from initial patient population for Search requests that download associated resources (e.g. consent, encounters, conditions)
 
 #split patient id list into smaller chunks that can be used in a GET url 
@@ -234,12 +237,14 @@ if(nrow(enc_tables$encounters)==0){
   stop("No Encounters for Patients found - aborting.")
 } 
 
-
 encounters <- enc_tables$encounters
 conditions <- enc_tables$conditions
 
 ###generate conditions table --> has all conditions of all Encounters of the initial Patient population
 if(!all(is.na(encounters$diagnosis))){
+  
+  #remove duplicate conditions if necessary
+  conditions <- unique(conditions)
   
   #extract diagnosis use info from encounter table 
   useInfo <- fhir_melt(encounters, columns = c("diagnosis", "diagnosis.use.code", "diagnosis.use.system"), 
