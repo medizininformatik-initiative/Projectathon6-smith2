@@ -142,6 +142,10 @@ if (!is.null(path_to_consented_pat_ids_csv)) {
   obs_tables$obs <-
     obs_tables$obs[get("subject") %in% paste0("Patient/", unique(obs_tables$pat[["id"]]))]
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> c534ff8d5b350e0770778d49678a36dd3c3bb0df
 #get rid of resources that have been downloaded multiple times via _include
 obs_tables$pat <- unique(obs_tables$pat)
 
@@ -383,6 +387,10 @@ if(!all(is.na(encounters$diagnosis))){
   #extract diagnosis use info from encounter table 
   useInfo <- fhir_melt(encounters, columns = c("diagnosis", "diagnosis.use.code", "diagnosis.use.system"), 
                        brackets = brackets, sep = sep, all_columns = T)
+<<<<<<< HEAD
+=======
+
+>>>>>>> c534ff8d5b350e0770778d49678a36dd3c3bb0df
   useInfo <- fhir_rm_indices(useInfo, brackets = brackets)
   useInfo <-
     useInfo[, c("encounter.id",
