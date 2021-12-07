@@ -97,12 +97,6 @@ obs_tables <- fhir_crack(
   data.table = TRUE
 )
 
-if (length(unique(obs_tables$pat[["id"]])) != obs_tables$pat[, .N]) {
-  write("Es wurden mehrere Patientenressourcen mit derselben ID heruntergeladen!",
-        file = "errors/error_message.txt")
-  stop("Multiple patients with same id were found - aborting.")
-}
-
 if (nrow(obs_tables$obs) == 0) {
   write(
     "Konnte keine Observations für NTproBNP auf dem Server finden. Abfrage abgebrochen.",
@@ -142,8 +136,15 @@ if (!is.null(path_to_consented_pat_ids_csv)) {
   obs_tables$obs <-
     obs_tables$obs[get("subject") %in% paste0("Patient/", unique(obs_tables$pat[["id"]]))]
 }
+
 #get rid of resources that have been downloaded multiple times via _include
 obs_tables$pat <- unique(obs_tables$pat)
+
+if (length(unique(obs_tables$pat[["id"]])) != obs_tables$pat[, .N]) {
+  write("Es wurden mehrere Patientenressourcen mit derselben ID heruntergeladen!",
+        file = "errors/error_message.txt")
+  stop("Multiple patients with same id were found - aborting.")
+}
 
 ### Prepare Patient id from initial patient population for Search requests that download associated resources (e.g. consent, encounters, conditions)
 
@@ -153,7 +154,12 @@ patients <- obs_tables$pat$id #all patient ids
 nchar_for_ids <- 1800 - nchar(
   paste0(
     base,
-    "Encounter?_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung",
+    "Encounter?",
+    ifelse(
+      test = is.null(encounter_profile_uri),
+      yes = "",
+      no = paste0("_profile=", encounter_profile_uri)
+    ),
     "_include=Encounter:diagnosis"
   )
 ) #assume maximal length of 1800
@@ -272,7 +278,12 @@ if (filterConsent) {
   nchar_for_ids <- 1800 - nchar(
     paste0(
       base,
-      "Encounter?_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung",
+      "Encounter?",
+      ifelse(
+        test = is.null(encounter_profile_uri),
+        yes = "",
+        no = paste0("_profile=", encounter_profile_uri)
+      ), 
       "_include=Encounter:diagnosis"
     )
   ) #assume maximal length of 1800
@@ -302,14 +313,15 @@ if (filterConsent) {
 encounter_list <- lapply(list, function(x) {
   ids <- paste(x, collapse = ",")
   
+  parameters <- c(subject = ids,
+                  "_include" = "Encounter:diagnosis")
+  if (!is.null(encounter_profile_uri)) {
+    parameters <- c(parameters, "_profile" = encounter_profile_uri)
+  }
   enc_request <- fhir_url(
     url = base,
     resource = "Encounter",
-    parameters = c(
-      subject = ids,
-      "_include" = "Encounter:diagnosis",
-      "_profile" = "https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung"
-    )
+    parameters = parameters
   )
   
   enc_bundles <- fhir_search(
@@ -383,10 +395,7 @@ if(!all(is.na(encounters$diagnosis))){
   #extract diagnosis use info from encounter table 
   useInfo <- fhir_melt(encounters, columns = c("diagnosis", "diagnosis.use.code", "diagnosis.use.system"), 
                        brackets = brackets, sep = sep, all_columns = T)
-<<<<<<< HEAD
-=======
 
->>>>>>> c534ff8d5b350e0770778d49678a36dd3c3bb0df
   useInfo <- fhir_rm_indices(useInfo, brackets = brackets)
   useInfo <-
     useInfo[, c("encounter.id",
