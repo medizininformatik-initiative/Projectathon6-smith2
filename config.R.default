@@ -28,9 +28,15 @@ token <- NULL #zB "mytoken"
 path_to_consented_pat_ids_csv <- NULL
 
 ## URI for Pat-ID in FHIR Ressources:
+## (Für den Fall, dass mithilfe der obigen Liste nach Pat-IDs gefiltert werden soll,
+## gibt dieses System an, welches System zu den Pat-IDs gehört, um den zugehörigen Value (= Pat-ID)
+## mit aus FHIR zu extrahieren))
 pat_id_system <- NULL
 
-## Encounter profile (To skip, set it to NULL):
-encounter_profile_uri <-
-  "https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung"
-# encounter_profile_uri <- NULL
+### Abgefragte Profile: Bitte NULL setzen, wenn Abfrage nicht auf Profile einschränken soll
+
+#Encounter 
+enc_profile <- "&_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung"
+
+#Observation
+obs_profile <- "&_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab"

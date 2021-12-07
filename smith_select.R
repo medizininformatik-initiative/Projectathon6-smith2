@@ -42,17 +42,15 @@ sep = " || "
 ###Get all Observations between 2019-01-01 and 2021-12-31 with loinc 33763-4,71425-3,33762-6,83107-3, 83108-1, 77622-9,77621-1
 #also get associated patient resources --> initial patient population
 #Observations have to implement MII profile
-obs_request <- fhir_url(
-  url = base,
-  resource = "Observation",
-  parameters = c(
-    "code" = "http://loinc.org|33763-4,http://loinc.org|71425-3,http://loinc.org|33762-6,http://loinc.org|83107-3,http://loinc.org|83108-1,http://loinc.org|77622-9,http://loinc.org|77621-1",
-    "date" = "ge2019-01-01",
-    "date" = "le2021-12-31",
-    "_include" = "Observation:patient",
-    "_profile" = "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab"
-  )
-)
+obs_request <- fhir_url(url = base, 
+                        resource = "Observation", 
+                        parameters = c("code" = "http://loinc.org|33763-4,http://loinc.org|71425-3,http://loinc.org|33762-6,http://loinc.org|83107-3,http://loinc.org|83108-1,http://loinc.org|77622-9,http://loinc.org|77621-1",
+                                       "date" = "ge2019-01-01",
+                                       "date" = "le2021-12-31",
+                                       "_include" = "Observation:patient"))
+
+#add profile from config
+obs_request <- fhir_url(paste0(obs_request, obs_profile))
 
 #download bundles
 obs_bundles <- fhir_search(
@@ -313,25 +311,21 @@ if (filterConsent) {
 encounter_list <- lapply(list, function(x) {
   ids <- paste(x, collapse = ",")
   
-  parameters <- c(subject = ids,
-                  "_include" = "Encounter:diagnosis")
-  if (!is.null(encounter_profile_uri)) {
-    parameters <- c(parameters, "_profile" = encounter_profile_uri)
-  }
-  enc_request <- fhir_url(
-    url = base,
-    resource = "Encounter",
-    parameters = parameters
-  )
+  enc_request <- fhir_url(url = base,
+                          resource = "Encounter",
+                          parameters = c(subject = ids,
+                                         "_include" = "Encounter:diagnosis"))
   
-  enc_bundles <- fhir_search(
-    enc_request,
-    username = username,
-    password = password,
-    token = token,
-    log_errors = "errors/encounter_error.xml"
-  )
-  
+  #add profile from config
+  enc_request <- fhir_url(url = paste0(enc_request, enc_profile))
+                          
+
+  enc_bundles <- fhir_search(enc_request,
+                             username = username,
+                             password = password,
+                             token = token,
+                             log_errors = "errors/encounter_error.xml")
+
 })
 
 #bring encounter results together, save and flatten
