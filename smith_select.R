@@ -142,6 +142,8 @@ if (!is.null(path_to_consented_pat_ids_csv)) {
   obs_tables$obs <-
     obs_tables$obs[get("subject") %in% paste0("Patient/", unique(obs_tables$pat[["id"]]))]
 }
+#get rid of resources that have been downloaded multiple times via _include
+obs_tables$pat <- unique(obs_tables$pat)
 
 ### Prepare Patient id from initial patient population for Search requests that download associated resources (e.g. consent, encounters, conditions)
 
@@ -369,21 +371,18 @@ if (nrow(enc_tables$encounters) == 0) {
   stop("No Encounters for Patients found - aborting.")
 }
 
-
 encounters <- enc_tables$encounters
 conditions <- enc_tables$conditions
 
 ###generate conditions table --> has all conditions of all Encounters of the initial Patient population
-if (!all(is.na(encounters$diagnosis))) {
-  #extract diagnosis use info from encounter table
-  useInfo <-
-    fhir_melt(
-      encounters,
-      columns = c("diagnosis", "diagnosis.use.code", "diagnosis.use.system"),
-      brackets = brackets,
-      sep = sep,
-      all_columns = T
-    )
+if(!all(is.na(encounters$diagnosis))){
+  
+  #remove duplicate conditions if necessary
+  conditions <- unique(conditions)
+  
+  #extract diagnosis use info from encounter table 
+  useInfo <- fhir_melt(encounters, columns = c("diagnosis", "diagnosis.use.code", "diagnosis.use.system"), 
+                       brackets = brackets, sep = sep, all_columns = T)
   useInfo <- fhir_rm_indices(useInfo, brackets = brackets)
   useInfo <-
     useInfo[, c("encounter.id",
