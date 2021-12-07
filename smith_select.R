@@ -455,14 +455,10 @@ encounters[, subject := sub("Patient/", "", subject)]
 encounters[, encounter.start := as.Date(encounter.start)]
 encounters[, encounter.end := as.Date(encounter.end)]
 
-#merge
-cohort <-  merge.data.table(
-  x = encounters,
-  y = obsdata,
-  by.x = "subject",
-  by.y = "subject",
-  all.x = TRUE
-)
+#merge based on subject id and temporal relation of observation date and encounter times
+cohort <- obsdata[encounters, on = .(subject, NTproBNP.date >= encounter.start, NTproBNP.date >= encounter.start), 
+                 c("encounter.id","encounter.start","encounter.end", "serviceType"):= list(encounter.id, encounter.start, encounter.end, serviceType)][]
+
 
 #remove encounters that don't have a NTproBNP observation within their encounter.period
 cohort <-
