@@ -66,6 +66,8 @@ obs_tables <- fhir_crack(obs_bundles,
                          design = fhir_design(obs = obs_description, pat = pat_description),
                          data.table = TRUE)
 
+rm(obs_bundles)
+
 if(nrow(obs_tables$obs)==0){
   write("Konnte keine Observations für NTproBNP auf dem Server finden. Abfrage abgebrochen.", file ="errors/error_message.txt")
   stop("No NTproBNP Observations found - aborting.")
@@ -98,7 +100,6 @@ while(any(nchar > nchar_for_ids)){
   list <- split(patients, ceiling(seq_along(patients)/n))
   nchar <- sapply(list, function(x){sum(nchar(x))+(length(x)-1)})
 }
-
 
 #get consent
 if(filterConsent){
@@ -157,6 +158,7 @@ obsdata <- merge.data.table(x = obs_tables$obs,
                             by.y = "id",
                             all.x = TRUE)
 
+rm(obs_tables)
 
 #if necessary filter for consent and create new list of patient id chunks
 if(filterConsent){
@@ -165,7 +167,7 @@ if(filterConsent){
   #split patient id list into smaller chunks that can be used in a GET url 
   #(split because we don't want to exceed allowed URL length)
   patients <- obsdata$subject #filtered patient ids
-  nchar_for_ids <- 1800 - nchar(paste0(base, 
+  nchar_for_ids <- 1800 - nchar(paste0(base,
                                        "Encounter?_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung",
                                        "_include=Encounter:diagnosis")) #assume maximal length of 1800
   
@@ -185,7 +187,7 @@ if(filterConsent){
 #get encounters and diagnoses 
 # --> all encounters of initial (possibly filtered for consent) patient population, 
 #has be filtered to only include encounters with NTproBNP Observation later on 
-encounter_list <- lapply(list, function(x){
+encounter_bundles <- lapply(list, function(x){
   
   ids <- paste(x, collapse = ",")
   
@@ -198,16 +200,16 @@ encounter_list <- lapply(list, function(x){
   enc_request <- fhir_url(url = paste0(enc_request, enc_profile))
                           
 
-  enc_bundles <- fhir_search(enc_request,
-                             username = username,
-                             password = password,
-                             token = token,
-                             log_errors = "errors/encounter_error.xml")
+ fhir_search(enc_request,
+             username = username,
+             password = password,
+             token = token,
+             log_errors = "errors/encounter_error.xml")
 
 })
 
 #bring encounter results together, save and flatten
-encounter_bundles <- fhircrackr:::fhir_bundle_list(unlist(encounter_list, recursive = F))
+encounter_bundles <- fhircrackr:::fhir_bundle_list(unlist(encounter_bundles, recursive = F))
 fhir_save(bundles = encounter_bundles, directory = "Bundles/Encounters")
 
 enc_description <- fhir_table_description("Encounter",
@@ -236,6 +238,8 @@ enc_tables <- fhir_crack(encounter_bundles,
                         sep = sep,
                         data.table = TRUE)
 
+rm(encounter_bundles)
+
 if(nrow(enc_tables$encounters)==0){
   write("Konnte keine Encounter-Ressourcen zu den gefundenen Patients finden. Abfrage abgebrochen.", file ="errors/error_message.txt")
   stop("No Encounters for Patients found - aborting.")
@@ -243,6 +247,8 @@ if(nrow(enc_tables$encounters)==0){
 
 encounters <- enc_tables$encounters
 conditions <- enc_tables$conditions
+
+rm(enc_tables)
 
 ###generate conditions table --> has all conditions of all Encounters of the initial Patient population
 if(!all(is.na(encounters$diagnosis))){
@@ -295,7 +301,7 @@ encounters[, encounter.end := as.Date(encounter.end)]
 cohort <- obsdata[encounters, on = .(subject, NTproBNP.date >= encounter.start, NTproBNP.date >= encounter.start), 
                  c("encounter.id","encounter.start","encounter.end", "serviceType"):= list(encounter.id, encounter.start, encounter.end, serviceType)][]
 
-
+rm(obsdata)
 #remove encounters that don't have a NTproBNP observation within their encounter.period
 cohort <- cohort[NTproBNP.date >= encounter.start & NTproBNP.date <= encounter.end]
 
@@ -306,8 +312,4 @@ conditions <- conditions[encounter.id %in% cohort$encounter.id]
 if(!dir.exists("Ergebnisse")){dir.create("Ergebnisse")}
 write.csv2(cohort, paste0("Ergebnisse/Kohorte.csv"))
 write.csv2(conditions, paste0("Ergebnisse/Diagnosen.csv"))
-
-
-
-
 
