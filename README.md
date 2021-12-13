@@ -1,9 +1,13 @@
 # Selectanfrage für den 6. Projectathon der MII: SMITH
-Datum: 25.11.21
+Datum: 13.12.21
 
 Autorin: [julia.palm@med.uni-jena.de](mailto:julia.palm@med.uni-jena.de).
 
-Dieses Project führt die Select-Anfrage für das SMITH Projekt im Rahmen des 6. Projectathons aus. Hier ist eine zentrale Analyse vorgesehen. Dafür erzeugt dieses Skript zwei Tabellen mit den für die Analyse benötigten Inhalten. Diese Tabellen sollen zentral zusammengeführt und an die datenauswertendende Stelle übergeben werden.
+*Für eine Dokumentation der Änderungen, die seit Veröffentlichung des Skriptes gemacht wurden, siehe ganz unten.*
+
+## Einführung
+
+Dieses Projekt führt die Select-Anfrage für das SMITH Projekt im Rahmen des 6. Projectathons aus. Hier ist eine zentrale Analyse vorgesehen. Dafür erzeugt dieses Skript zwei Tabellen mit den für die Analyse benötigten Inhalten. Diese Tabellen sollen zentral zusammengeführt und an die datenauswertendende Stelle übergeben werden.
 
 Das Readme beschreibt zunächst die technischen Details der Verwendung. Darunter sind die verwendeten CodeSysteme/Ressourcen/Profile und der konzeptionelle Ablauf der Abfrage beschrieben.
 
@@ -263,4 +267,40 @@ Request (beispielhaft für Patient ids `xxx` und `yyy`): `[base]/Encounter?_incl
 4) Filtere die Diagnosen, sodass nur Diagnosen übrig bleiben, die zu den Encountern aus 3) gehören.
 
 
+## Changelog
+
+**13.12.21**
+
+*Änderung*: Changelog im README wurde ergänzt
+
+-------------------
+
+**10.12.21**
+
+*Änderung*: Nicht mehr benötigte Zwischenergebnisse werden frühzeitig gelöscht.
+
+*Erklärung*: In DIZen mit großen Datenmengen kommt der Arbeitsspeicher des Docker-Containers an seine Grenzen. Die Änderung hat keinen Einfluss auf die Ergebnisse der Skripte.
+
+---------------------
+
+**07.12.21**
+
+*Änderung*: Encounter-Ressourcen, die durch `_include` doppelt heruntergeladen wurden, werden jetzt im Skript gelöscht. 
+
+*Erklärung*: Doppelt heruntergeladene Encounter führten zuvor im Skript für Fehlermeldungen beim Mergen der Daten. DIZen, die das Skript zuvor schon fehlerfrei ausführen konnten, hatten keine doppelt heruntergeladenen Encounter und bekommen durch diese Änderung demzufolge auch keine geänderten Ergebnisse
+
+---------------------------
+
+*Änderung*: Merge Encounter- und Observation-Ressouren basierend auf Subject-ID und Datum, nicht auf Subject-ID allein.
+
+*Erklärung*: Der Merge anhand der Subject-ID allein funktionierte nur eindeutig, solange Encounter und Observations eines Subject (=Patient) in einem 1:n oder m:1-Verhältnis standen. In diesem Fall konnte man erst mergen und dann die Zeiträume filtern, sodass nur zueinander passende Ressourcen behalten wurden. Wenn Encounter und Observations in m:n Verhältnis vorlagen, warf das Sktipt einen Fehler, der durch die neue Merge-Technik behoben wird.
+DIZen, bei denen das Sktipt schon vor der Anpassung keinen Fehler warf, bekommen trotzdem das gleiche Ergebnis, weil die zeitliche Filterung der Ressourcen jetzt einfach nur einen Arbeitsschritt nach vorne gelegt wurde.
+
+----------------------------
+
+*Änderung*: Die Einschränlung der Abfrage auf MII-Profile z.B. über `_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung` ist jetzt im config.R konfigurierbar. Sie kann komplett ausgeschaltet oder wenn nötig auf ein andere Profil angepasst werden.
+
+*Erklärung*: Einige DIZen haben die Profile noch nicht in `Resource.meta.profile` referenziert und bekommen mit der Einschränkung keine Ergebnisse.
+
+-------------------------------
 
