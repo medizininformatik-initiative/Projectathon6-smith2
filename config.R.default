@@ -24,6 +24,15 @@ password <- NULL #zB "mypassword"
 # Alternativ: Token für Bearer Token Authentifizierung
 token <- NULL #zB "mytoken"
 
+## Path to file with consented ids (one column, no header):
+path_to_consented_pat_ids_csv <- NULL
+
+## URI for Pat-ID in FHIR Ressources:
+## (Für den Fall, dass mithilfe der obigen Liste nach Pat-IDs gefiltert werden soll,
+## gibt dieses System an, welches System zu den Pat-IDs gehört, um den zugehörigen Value (= Pat-ID)
+## mit aus FHIR zu extrahieren))
+pat_id_system <- NULL
+
 ### Abgefragte Profile: Bitte NULL setzen, wenn Abfrage nicht auf Profile einschränken soll
 
 #Encounter 
