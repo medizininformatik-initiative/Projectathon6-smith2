@@ -44,7 +44,7 @@ Durch Öffnen des R-Projektes (`Projectathon6-smith2.Rproj`) mit anschließendem
 Um die Abfrage in einem Docker Container laufen zu lassen gibt es drei Möglichkeiten:
 
 **A) Image von DockerHub ziehen:**
-1. Git-Respository klonen: `git clone https://github.com/palmjulia/Projectathon6-smith2.git`
+1. Git-Repository klonen: `git clone https://github.com/palmjulia/Projectathon6-smith2.git`
 2. Verzeichniswechsel in das lokale Repository: `cd Projectathon6-smith2`
 3. Konfiguration lokal anpassen: `./config.R.default` nach `./config.R` kopieren und anpassen 
 4. Image downloaden und Container starten: `docker run --name projectathon6-smith2 -v "$(pwd)/errors:/errors" -v "$(pwd)/Bundles:/Bundles" -v "$(pwd)/Ergebnisse:/Ergebnisse" -v "$(pwd)/config.R:/config.R" palmjulia/projectathon6-smith2`
@@ -52,7 +52,7 @@ Um die Abfrage in einem Docker Container laufen zu lassen gibt es drei Möglichk
 
 **B) Image bauen mit Docker Compose:**
 
-1. Git-Respository klonen: `git clone https://github.com/palmjulia/Projectathon6-smith2.git`
+1. Git-Repository klonen: `git clone https://github.com/palmjulia/Projectathon6-smith2.git`
 2. Verzeichniswechsel in das lokale Repository: `cd Projectathon6-smith2`
 3. Konfiguration lokal anpassen: `./config.R.default` nach `./config.R` kopieren und anpassen 
 4. Image bauen und Container starten: `docker compose up -d`
@@ -61,7 +61,7 @@ Zum Stoppen des Containers `docker compose stop`. Um ihn erneut zu starten, `doc
 
 **C) Image bauen ohne Docker Compose**
 
-1. Git-Respository klonen: `git clone https://github.com/palmjulia/Projectathon6-smith2.git`
+1. Git-Repository klonen: `git clone https://github.com/palmjulia/Projectathon6-smith2.git`
 2. Verzeichniswechsel in das lokale Repository: `cd Projectathon6-smith2`
 3. Image bauen: `docker build -t projectathon6-smith2 .` 
 4. Konfiguration lokal anpassen: `./config.R.default` nach `./config.R` kopieren und anpassen 
