@@ -1,5 +1,5 @@
 # Selectanfrage für den 6. Projectathon der MII: SMITH
-Datum: 13.12.21
+Datum: 14.01.22
 
 Autorin: [julia.palm@med.uni-jena.de](mailto:julia.palm@med.uni-jena.de).
 
@@ -268,6 +268,12 @@ Request (beispielhaft für Patient ids `xxx` und `yyy`): `[base]/Encounter?_incl
 
 
 ## Changelog
+
+**14.01.2022**
+
+*Änderung*: Typo in smith_select.R korrigiert.
+
+*Erklärung* Korrigiert Fehler in der zeitlichen Relation im merge-Befehl in Z301. Sollte keine oder maximal geringfügigen Einfluss auf die Ergebnisse haben, da im Folgenden sowieso nochmal nach korrektem Zeitbezug gefiltert wird.
 
 **13.12.21**
 
