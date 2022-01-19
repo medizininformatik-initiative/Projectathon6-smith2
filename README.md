@@ -1,5 +1,5 @@
 # Selectanfrage für den 6. Projectathon der MII: SMITH
-Datum: 14.01.22
+Datum: 19.01.22
 
 Autorin: [julia.palm@med.uni-jena.de](mailto:julia.palm@med.uni-jena.de).
 
@@ -22,7 +22,7 @@ Es gibt zwei Möglichkeiten diese R-Skripte auszuführen: Direkt in R oder in ei
 
 3. Die mitgelieferte Datei `./config.R.default` muss nach `./config.R` kopiert werden und lokal angepasst werden (FHIR-Endpunkt, ggf. Authentifizierung, SSL peer verification); Erklärungen dazu finden sich direkt in dieser Datei. Eine Authentifizierung mit Basic Authentication oder Bearer Token ist möglich. Dafür müssen in `config.R` die Variable `authentication` und die zugehörigen Zugangsdaten (`password`/`username` bzw. `token`) angepasst werden.
 Wenn die Abfrage auf einem Server laufen sollen, der sowohl konsentierte als auch nicht konsentierte Daten enthält, so kann durch setzen der Variable `filterConsent <- TRUE` dafür gesorgt werden, dass nur Daten von Patienten extrahiert werden, auf die eine Consent-Ressource mit einem `2.16.840.1.113883.3.1937.777.24.5.3.8` (*MDAT_wissenschaftlich_nutzen_EU_DSGVO_NIVEAU*) Code verweist.  
-Außerdem kann über die Variablen `enc_profile` und `obs_profile` das Profil angepasst werden, für das beim Download gefiltert wird, bzw. durch `NULL` setzen dieser Variable die Prüfung eines Profils vollständig ausgeschaltet werden.
+Außerdem kann über die Variablen `enc_profile`, `obs_profile` und `con_profile` das Profil angepasst werden, für das beim Download gefiltert wird, bzw. durch `NULL` setzen dieser Variable die Prüfung eines Profils vollständig ausgeschaltet werden.
 
 4. Wenn die App über `runSmith_select.bat` (unter Windows) gestartet soll, muss in dieser der Pfad zur Datei `Rscript.exe` geprüft und ggf. angepasst werden (z.B. `C:\Program Files\R\R-4.0.4\bin\Rscript.exe`).
 
@@ -228,6 +228,7 @@ Extrahierte Elemente:
 - `Condition.code.coding.code`
 - `Condition.code.coding.system`
 - `Condition.subject.reference`
+- `Conditions.encounter.reference`
 
 
 ### Modul Consent: Consent
@@ -252,26 +253,33 @@ Prinzipiell geht das Skript wie folgt vor:
 
 1) Lade alle Observations, die eine NTproBNP-Messung darstellen (`loinc code` ist einer aus: `33763-4,71425-3,33762-6,83107-3, 83108-1,77622-9,77621-1`), welche ein `effective` im Zeitraum `2019-01-01 - 2021-12-31` haben und das Profil `https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab` erfüllen, herunter. Ziehe dazu außerdem (mit `_include`) die zugehörigen Patient Ressourcen.
 
-Request: `[base]/Observation?_include=Observation%3Apatient&_profile=https%3A%2F%2Fwww.medizininformatik-initiative.de%2Ffhir%2Fcore%2Fmodul-labor%2FStructureDefinition%2FObservationLab&code=http%3A%2F%2Floinc.org%7C33763-4%2Chttp%3A%2F%2Floinc.org%7C71425-3%2Chttp%3A%2F%2Floinc.org%7C33762-6%2Chttp%3A%2F%2Floinc.org%7C83107-3%2Chttp%3A%2F%2Floinc.org%7C83108-1%2Chttp%3A%2F%2Floinc.org%7C77622-9%2Chttp%3A%2F%2Floinc.org%7C77621-1&date=ge2019-01-01&date=le2021-12-31`
+- `[base]/Observation?_include=Observation:patient&_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab&code=http://loinc.org|33763-4,http://loinc.org|71425-3,http://loinc.org|33762-6,http://loinc.org|83107-3,http://loinc.org|83108-1,http://loinc.org|77622-9,http://loinc.org|77621-1&date=ge2019-01-01&date=le2021-12-31`
 
-1a) Optional: Lade die zu den Patienten gehörigen Consents herunter und filtere die bisher geladenen Daten, sodass nur Daten von Patienten mit Consent übrig bleiben. 
+2) Optional: Lade die zu den Patienten gehörigen Consents herunter und filtere die bisher geladenen Daten, sodass nur Daten von Patienten mit Consent übrig bleiben. 
 
-Request (beispielhaft für Patient ids `xxx` und `yyy`): `[base]/Consent?patient=xxx%2Cyyy`
+- `[base]/Consent?patient=xxx%2Cyyy`
 
-2) Extrahiere die IDs der Patient Ressourcen und verwende sie um alle zugehörigen Encounter und die darin verlinkten Condition-Ressourcen herunterzuladen. Dafür werden die Abfragen soweit gesplittet, dass der jeweilige GET-Request eine Länge von 1800 Zeichen nicht überschreitet.(Mir ist klar, das POST eleganter ist, aber wir versuchen die Anforderungen an den Server/Rechte möglichst niedrig zu halten.) Die Encounter müssen das Profil KontaktGesundheitseinrichtung der MII implementieren. 
+3) Extrahiere die IDs der Patient Ressourcen und verwende sie um alle zugehörigen Encounter und Condition-Ressourcen herunterzuladen. Dafür werden die Abfragen soweit gesplittet, dass der jeweilige GET-Request eine Länge von 1800 Zeichen nicht überschreitet.(Mir ist klar, das POST eleganter ist, aber wir versuchen die Anforderungen an den Server/Rechte möglichst niedrig zu halten.) 
 
-Request (beispielhaft für Patient ids `xxx` und `yyy`): `[base]/Encounter?_include=Encounter%3Adiagnosis&_profile=https%3A%2F%2Fwww.medizininformatik-initiative.de%2Ffhir%2Fcore%2Fmodul-fall%2FStructureDefinition%2FKontaktGesundheitseinrichtung&subject=xxx%2Cyyy`
+- `[base]/Encounter?&_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung&subject=xxx,yyy`
+- `[base]/Condition?_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose&subject=xxx,yyy`
 
-3) Filtere die Encounter, sodass nur die Encounter übrig bleiben, in deren `period` eine NTproBNP Observation liegt.
 
-4) Filtere die Diagnosen, sodass nur Diagnosen übrig bleiben, die zu den Encountern aus 3) gehören.
+4) Filtere die Encounter, sodass nur die Encounter übrig bleiben, in deren `period` eine NTproBNP Observation liegt.
+
+5) Filtere die Diagnosen, sodass nur Diagnosen übrig bleiben, die zu den Encountern aus 4) gehören.
 
 
 ## Changelog
+**19.01.2022**
+
+*Änderung*: Logik beim herunterladen von Conditions geändert: Es werden jetzt alle Conditions zu den untersuchten Patienten gezogen und anschließend so gefiltert, dass nur Conditions übrig bleiben, die zu den gewünschten Encountern gehören. Entsprechend wurde im `config.R` das Profil für die Condition ergänzt und kann nach Bedarf an- und abgeschaltet werden.
+
+*Erklärung*: Damit ist es jetzt irrelevant, ob der Encounter auf die Condition verlinkt oder die Condition auf den Encounter verlinkt. Das Skript funktioniert, solange mindestens eine der Richtungen gegeben ist. Diese Änderung wurde implementiert, weil sich herausstellt, dass die Linkrichtung in den verschiedenen DIZen zu heterogen ist, als das man sich auf eine von beiden verlassen könnte.
 
 **14.01.2022**
 
-*Änderung*: Typo in smith_select.R korrigiert.
+*Änderung*: Typo in `smith_select.R` korrigiert.
 
 *Erklärung* Korrigiert Fehler in der zeitlichen Relation im merge-Befehl in Z301. Sollte keine oder maximal geringfügigen Einfluss auf die Ergebnisse haben, da im Folgenden sowieso nochmal nach korrektem Zeitbezug gefiltert wird.
 
@@ -304,7 +312,7 @@ DIZen, bei denen das Sktipt schon vor der Anpassung keinen Fehler warf, bekommen
 
 ----------------------------
 
-*Änderung*: Die Einschränlung der Abfrage auf MII-Profile z.B. über `_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung` ist jetzt im config.R konfigurierbar. Sie kann komplett ausgeschaltet oder wenn nötig auf ein andere Profil angepasst werden.
+*Änderung*: Die Einschränkung der Abfrage auf MII-Profile z.B. über `_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung` ist jetzt im `config.R` konfigurierbar. Sie kann komplett ausgeschaltet oder wenn nötig auf ein andere Profil angepasst werden.
 
 *Erklärung*: Einige DIZen haben die Profile noch nicht in `Resource.meta.profile` referenziert und bekommen mit der Einschränkung keine Ergebnisse.
 
