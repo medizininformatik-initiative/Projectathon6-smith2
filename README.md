@@ -271,6 +271,10 @@ Prinzipiell geht das Skript wie folgt vor:
 
 
 ## Changelog
+**18.02.2022**
+
+*Änderung*: Das Skript schickt jetzt einige informative Nachrichten in die Konsole um das Debugging zu erleichertern. Die Ergebnisse ändern sich dadurch in keiner Weise.
+
 **19.01.2022**
 
 *Änderung*: Logik beim herunterladen von Conditions geändert: Es werden jetzt alle Conditions zu den untersuchten Patienten gezogen und anschließend so gefiltert, dass nur Conditions übrig bleiben, die zu den gewünschten Encountern gehören. Entsprechend wurde im `config.R` das Profil für die Condition ergänzt und kann nach Bedarf an- und abgeschaltet werden.

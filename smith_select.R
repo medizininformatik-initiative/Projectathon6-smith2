@@ -29,8 +29,8 @@ sep = " || "
 ###Get all Observations between 2019-01-01 and 2021-12-31 with loinc 33763-4,71425-3,33762-6,83107-3, 83108-1, 77622-9,77621-1
 #also get associated patient resources --> initial patient population
 #Observations have to implement MII profile
-obs_request <- fhir_url(url = base, 
-                        resource = "Observation", 
+obs_request <- fhir_url(url = base,
+                        resource = "Observation",
                         parameters = c("code" = "http://loinc.org|33763-4,http://loinc.org|71425-3,http://loinc.org|33762-6,http://loinc.org|83107-3,http://loinc.org|83108-1,http://loinc.org|77622-9,http://loinc.org|77621-1",
                                        "date" = "ge2019-01-01",
                                        "date" = "le2021-12-31",
@@ -40,11 +40,13 @@ obs_request <- fhir_url(url = base,
 obs_request <- fhir_url(paste0(obs_request, obs_profile))
 
 #download bundles
+message("Downloading Observations: ", obs_request, "\n")
 obs_bundles <- fhir_search(request = obs_request,
                            username = username,
                            password = password,
                            token = token,
-                           log_errors = "errors/observation_error.xml")
+                           log_errors = "errors/observation_error.xml",
+                           verbose = 0)
 
 #save for checking purposes
 fhir_save(bundles = obs_bundles, directory = "Bundles/Observations")
@@ -62,9 +64,11 @@ pat_description <- fhir_table_description("Patient",
                                                    gender = "gender", 
                                                    birthdate = "birthDate"))
 
+message("Cracking ", length(obs_bundles), " Observation Bundles.\n")
 obs_tables <- fhir_crack(obs_bundles, 
                          design = fhir_design(obs = obs_description, pat = pat_description),
-                         data.table = TRUE)
+                         data.table = TRUE,
+                         verbose = 0)
 
 rm(obs_bundles)
 
@@ -151,6 +155,10 @@ obs_tables$obs[, subject:=sub("Patient/", "", subject)]
 obs_tables$obs[, NTproBNP.date := as.Date(NTproBNP.date)]
 
 #merge
+message("Merging Observation and Patient data based on Patient id.\n", 
+        "Number of unique Patient ids in Patient data: ", length(unique(obs_tables$pat$id)), " in ", nrow(obs_tables$pat), " rows", "\n",
+        "Number of unique Patient ids in Observation data: ", length(unique(obs_tables$obs$subject)), " in ", nrow(obs_tables$obs), " rows","\n")
+        
 obsdata <- merge.data.table(x = obs_tables$obs, 
                             y = obs_tables$pat, 
                             by.x = "subject",
@@ -187,7 +195,7 @@ if(filterConsent){
 #has be filtered to only include encounters with NTproBNP Observation later on 
 encounter_bundles <- list()
 condition_bundles <- list()
-
+message("Downloading Encounters and Conditions.\n")
 invisible({
   lapply(list, function(x){
     
@@ -207,7 +215,8 @@ invisible({
                                              username = username,
                                              password = password,
                                              token = token,
-                                             log_errors = "errors/encounter_error.xml"))
+                                             log_errors = "errors/encounter_error.xml",
+                                             verbose = 0))
     
     ###Conditions
     con_request <- fhir_url(url = base,
@@ -223,7 +232,8 @@ invisible({
                                              username = username,
                                              password = password,
                                              token = token,
-                                             log_errors = "errors/condition_error.xml"))
+                                             log_errors = "errors/condition_error.xml",
+                                             verbose = 0))
     
   })
 })
@@ -243,11 +253,14 @@ enc_description <- fhir_table_description("Encounter",
                                                    diagnosis.use.code = "diagnosis/use/coding/code",
                                                    diagnosis.use.system = "diagnosis/use/coding/system",
                                                    serviceType = "serviceType"))
+
+message("Cracking ", length(encounter_bundles), " Encounter Bundles.\n")
 encounters <- fhir_crack(encounter_bundles, 
                          design = enc_description,
                          brackets = brackets,
                          sep = sep,
-                         data.table = TRUE)
+                         data.table = TRUE,
+                         verbose = 0)
 rm(encounter_bundles)
 
 
@@ -261,11 +274,14 @@ con_description <- fhir_table_description("Condition",
                                                    code.system = "code/coding/system",
                                                    subject = "subject/reference",
                                                    encounter = "encounter/reference"))
+
+message("Cracking ", length(condition_bundles), " Condition Bundles.\n")
 conditions <- fhir_crack(condition_bundles, 
                          design = con_description,
                          brackets = brackets,
                          sep = sep,
-                         data.table = TRUE)
+                         data.table = TRUE,
+                         verbose = 0)
 rm(condition_bundles)
 
 
@@ -299,6 +315,10 @@ if(nrow(conditions)>0){
   conditions <- conditions[grepl("icd-10", code.system)]
   
   #add diagnosis use info to condition table
+  message("Merging Condition and Encounter data based on Condition id.\n", 
+          "Number of unique Condition ids in Condition data: ", length(unique(conditions$condition.id)), " in ", nrow(conditions), " rows", "\n",
+          "Number of unique Condition ids in Encounter data: ", length(unique(useInfo$diagnosis)), " in ", nrow(useInfo), " rows","\n")
+  
   conditions <- merge.data.table(x = conditions, 
                                  y = useInfo,
                                  by.x = "condition.id",
@@ -328,6 +348,10 @@ encounters[, encounter.start := as.Date(encounter.start)]
 encounters[, encounter.end := as.Date(encounter.end)]
 
 #merge based on subject id and temporal relation of observation date and encounter times
+message("Merging Observation and Encounter data based on Subject id and time.\n", 
+        "Number of unique Subject ids in Observation data: ", length(unique(obsdata$subject)), " in ", nrow(obsdata), " rows", "\n",
+        "Number of unique Subject ids in Encounter data: ", length(unique(encounters$subject)), " in ", nrow(encounters), " rows","\n")
+
 cohort <- obsdata[encounters, on = .(subject, NTproBNP.date >= encounter.start, NTproBNP.date <= encounter.end), 
                   c("encounter.id","encounter.start","encounter.end", "serviceType"):= list(encounter.id, encounter.start, encounter.end, serviceType)][]
 
