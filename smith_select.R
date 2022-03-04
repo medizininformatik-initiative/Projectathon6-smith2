@@ -56,6 +56,8 @@ obs_description <- fhir_table_description("Observation",
                                           cols = c(NTproBNP.date = "effectiveDateTime",
                                                    subject = "subject/reference",
                                                    NTproBNP.value = "valueQuantity/value",
+                                                   NTproBNP.code = "code/coding/code",
+                                                   NTproBNP.codeSystem = "code/coding/system",
                                                    NTproBNP.unit = "valueQuantity/code",
                                                    NTproBNP.unitSystem = "valueQuantity/system"))
 
@@ -67,6 +69,8 @@ pat_description <- fhir_table_description("Patient",
 message("Cracking ", length(obs_bundles), " Observation Bundles.\n")
 obs_tables <- fhir_crack(obs_bundles, 
                          design = fhir_design(obs = obs_description, pat = pat_description),
+                         sep = sep,
+                         brackets = brackets, 
                          data.table = TRUE,
                          verbose = 0)
 
@@ -81,6 +85,25 @@ if(nrow(obs_tables$pat)==0){
   write("Konnte keine Patientenressourcen für NTproBNP-Observations auf dem Server finden. Abfrage abgebrochen.", file ="errors/error_message.txt")
   stop("No Patients for NTproBNP Observations found - aborting.")
 }
+
+#melt multiple entries/remove indices
+obs_tables$pat <- fhir_rm_indices(obs_tables$pat, brackets = brackets)
+
+obs_tables$obs <- fhir_melt(obs_tables$obs, 
+                            columns = c("NTproBNP.code", "NTproBNP.codeSystem"), 
+                            brackets = brackets,
+                            sep = sep, 
+                            all_columns = TRUE)
+
+obs_tables$obs <- fhir_melt(obs_tables$obs, 
+                            columns = c("NTproBNP.code", "NTproBNP.codeSystem"), 
+                            brackets = brackets,
+                            sep = sep,
+                            all_columns = TRUE)
+
+obs_tables$obs <- fhir_rm_indices(obs_tables$obs, brackets = brackets)
+obs_tables$obs[, resource_identifier := NULL]
+obs_tables$obs <- obs_tables$obs[NTproBNP.codeSystem=="http://loinc.org"]
 
 #get rid of resources that have been downloaded multiple times via _include
 obs_tables$pat <- unique(obs_tables$pat)

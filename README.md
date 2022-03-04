@@ -115,6 +115,8 @@ Diese Tabelle enthält eine Kombination von Informationen aus der Patient Ressou
 |serviceType          | ServiceType (Stationsschlüssel) des Einrichtungskontakt-Encounters, der zeitlich zur NTproBNP-Messung gehört.|
 |NTproBNP.date        | Datum (effectiveDateTime) der Observation mit der NTproBNP-Messung.|
 |NTproBNP.value       | Wert (valueQuantity.value) der Observation mit der NTproBNP-Messung.|
+|NTproBNP.code        | Loinc-Code (code.coding.code) der Observation mit der NTproBNP-Messung.|
+|NTproBNP.codeSystem  | CodeSystem (code.coding.system) der Observation mit der NTproBNP-Messung.|
 |NTproBNP.unit        | Code der Einheit (valueQuantity.code) der NTproBNP-Messung.|
 |NTproBNP.unitSystem  | Codesystem der Einheit (valueQuantity.code) der NTproBNP-Messung.|
 |gender               | Geschlecht (gender) der Patient Ressource|
@@ -171,6 +173,8 @@ Extrahierte Elemente:
 
 - `Observation.effectiveDateTime`
 - `Observation.subject.reference`
+- `Observation.code.coding.code`
+- `Observation.code.coding.system`
 - `Observation.valueQuantity.value`
 - `Observation.valueQuantity.code`
 - `Observation.valueQuantity.system`
@@ -271,6 +275,10 @@ Prinzipiell geht das Skript wie folgt vor:
 
 
 ## Changelog
+**04.03.2022**
+
+*Änderung*: Zur Qualitätssicherung wird für jede NTproBNP-Messung nun auch der zugehörige Loinc-Code extrahiert, der zur Filterung der jeweiligen Observation verwendet wurde. Es gibt deshalb in Kohorte.csv nun zwei zusätzliche Spalten: NTproBNP.code und NTproBNP.codeSystem.
+
 **18.02.2022**
 
 *Änderung*: Das Skript schickt jetzt einige informative Nachrichten in die Konsole um das Debugging zu erleichertern. Die Ergebnisse ändern sich dadurch in keiner Weise.
