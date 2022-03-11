@@ -391,3 +391,7 @@ if(!dir.exists("Ergebnisse")){dir.create("Ergebnisse")}
 write.csv2(cohort, paste0("Ergebnisse/Kohorte.csv"))
 write.csv2(conditions, paste0("Ergebnisse/Diagnosen.csv"))
 
+##DQ Report
+if(dq_report) {
+  rmarkdown::render("smith_dq_report.RMD", output_format = "html_document", output_file = "Ergebnisse/DQ-Report.html")
+}

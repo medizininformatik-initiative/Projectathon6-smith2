@@ -275,6 +275,10 @@ Prinzipiell geht das Skript wie folgt vor:
 
 
 ## Changelog
+**11.03.2022**
+
+*Änderung*: Branch für Checks zur Qualitätssicherung mit DQ-Report Skript und zugehörigen Metadaten.
+
 **04.03.2022**
 
 *Änderung*: Zur Qualitätssicherung wird für jede NTproBNP-Messung nun auch der zugehörige Loinc-Code extrahiert, der zur Filterung der jeweiligen Observation verwendet wurde. Es gibt deshalb in Kohorte.csv nun zwei zusätzliche Spalten: NTproBNP.code und NTproBNP.codeSystem.

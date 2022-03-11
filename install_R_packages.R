@@ -1,5 +1,5 @@
 #load/install packages
-packages <- c("fhircrackr", "data.table")
+packages <- c("fhircrackr", "data.table","knitr","dataquieR")
 
 for(package in packages){
   

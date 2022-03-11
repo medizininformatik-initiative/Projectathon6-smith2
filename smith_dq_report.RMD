@@ -1,0 +1,186 @@
+---
+title: "DQ report - SMITH"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r include=FALSE}
+### LIBRARIES ------------------------
+library(knitr)
+library(dataquieR)
+library(data.table)
+
+```
+
+```{r include=FALSE}
+### READ DATA -------------------
+
+if(!file.exists("Ergebnisse\\Kohorte.csv")){
+  write("Ergebnisse nicht gefunden.", file ="errors/error_message.txt")
+  stop("Results not found - aborting.")
+}
+
+# read result csv
+cohort_report <- read.csv("Ergebnisse\\Kohorte.csv", sep = ";")
+
+# read metadata
+metadata_report <- read.csv("DQ_metadata\\metadata.csv")
+checks_report <- read.csv("DQ_metadata\\contradictions.csv")
+
+# fix typing
+cohort_report <- as.data.table(cohort_report)
+metadata_report <- as.data.table(metadata_report)
+cohort_report$NTproBNP.date <- as.Date(cohort_report$NTproBNP.date)
+cohort_report$encounter.start <- as.Date(cohort_report$encounter.start)
+cohort_report$encounter.end <- as.Date(cohort_report$encounter.end)
+cohort_report$birthdate <- as.Date(cohort_report$birthdate)
+cohort_report$NTproBNP.value <- as.double(cohort_report$NTproBNP.value)
+
+# verify correct typing
+#sapply(cohort_report, class)
+
+# drop unused columns
+cohort_report[, c("X","subject","serviceType","encounter.id") := NULL]
+
+```
+
+```{r include=FALSE}
+### Transform to dataquiR format -------------------
+# value_labels <- rbind(metadata_report$VAR_NAMES,metadata_report$VALUE_LABELS)
+# value_labels <- as.data.table(value_labels[,3:7])
+
+value_NtproBNP.code	<- c("33763-4", "71425-3", "33762-6", "83107-3", "83108-1", "77622-9", "77621-1")
+value_NtproBNP.codeSystem	<- "http://loinc.org"
+value_NTproBNP.unit	<- "pg/mL"
+value_NTproBNP.unitSystem <- "http://unitsofmeasure.org"
+value_gender <- c("male","female")
+
+# apply valuelabels
+write("common values for 'other':", file ="Ergebnisse/value_labels.txt", append = FALSE)
+# NTproBNP.code
+cohort_report$NTproBNP.code <- gsub(value_NtproBNP.code[1],"2",cohort_report$NTproBNP.code)
+cohort_report$NTproBNP.code <- gsub(value_NtproBNP.code[2],"3",cohort_report$NTproBNP.code)
+cohort_report$NTproBNP.code <- gsub(value_NtproBNP.code[3],"4",cohort_report$NTproBNP.code)
+cohort_report$NTproBNP.code <- gsub(value_NtproBNP.code[4],"5",cohort_report$NTproBNP.code)
+cohort_report$NTproBNP.code <- gsub(value_NtproBNP.code[5],"6",cohort_report$NTproBNP.code)
+cohort_report$NTproBNP.code <- gsub(value_NtproBNP.code[6],"7",cohort_report$NTproBNP.code)
+cohort_report$NTproBNP.code <- gsub(value_NtproBNP.code[7],"8",cohort_report$NTproBNP.code)
+write(c("NTproBNP.code: ",t(as.data.table(table(cohort_report$NTproBNP.code))[,1])), file ="Ergebnisse/value_labels.txt", append = TRUE)
+cohort_report$NTproBNP.code <- (as.numeric(cohort_report$NTproBNP.code))
+cohort_report$NTproBNP.code[is.na(cohort_report$NTproBNP.code)] <- 1
+# NTproBNP.codeSystem
+cohort_report$NTproBNP.codeSystem <- gsub(value_NtproBNP.codeSystem,"2",cohort_report$NTproBNP.codeSystem)
+write(c("NTproBNP.codeSystem: ",t(as.data.table(table(cohort_report$NTproBNP.codeSystem))[,1])), file ="Ergebnisse/value_labels.txt", append = TRUE)
+cohort_report$NTproBNP.codeSystem <- (as.numeric(cohort_report$NTproBNP.codeSystem))
+cohort_report$NTproBNP.codeSystem[is.na(cohort_report$NTproBNP.codeSystem)] <- 1
+# NTproBNP.unit
+cohort_report$NTproBNP.unit <- gsub(value_NTproBNP.unit,"2",cohort_report$NTproBNP.unit)
+write(c("NTproBNP.unit: ",t(as.data.table(table(cohort_report$NTproBNP.unit))[,1])), file ="Ergebnisse/value_labels.txt", append = TRUE)
+cohort_report$NTproBNP.unit <- (as.numeric(cohort_report$NTproBNP.unit))
+cohort_report$NTproBNP.unit[is.na(cohort_report$NTproBNP.unit)] <- 1
+# NTproBNP.unitSystem
+cohort_report$NTproBNP.unitSystem <- gsub(value_NTproBNP.unitSystem,"2",cohort_report$NTproBNP.unitSystem)
+write(c("NTproBNP.unitSystem: ",t(as.data.table(table(cohort_report$NTproBNP.unitSystem))[,1])), file ="Ergebnisse/value_labels.txt", append = TRUE)
+cohort_report$NTproBNP.unitSystem <- (as.numeric(cohort_report$NTproBNP.unitSystem))
+cohort_report$NTproBNP.unitSystem[is.na(cohort_report$NTproBNP.unitSystem)] <- 1
+# gender
+cohort_report$gender <- gsub(value_gender[2],"3",cohort_report$gender)
+cohort_report$gender <- gsub(value_gender[1],"2",cohort_report$gender)
+write(c("gender: ",t(as.data.table(table(cohort_report$gender))[,1])), file ="Ergebnisse/value_labels.txt", append = TRUE)
+cohort_report$gender <- (as.numeric(cohort_report$gender))
+cohort_report$gender[is.na(cohort_report$gender)] <- 1
+
+#calculate age
+#floor(as.numeric((Sys.Date() - cohort_report$birthdate) / 365.25))
+
+# verify correct typing
+sapply(cohort_report, typeof)
+sapply(cohort_report, class)
+
+```
+
+```{r include=FALSE}
+### GENERATE REPORTS ----------------------
+smith_dq_report <- dq_report(study_data = cohort_report,
+                          meta_data  = metadata_report,
+                          check_table = checks_report,
+                          label_col  = LABEL)
+
+```
+
+## Data Quality report for the 6. Projectathon of MII: SMITH
+
+#### This report was created with the [dataquieR](https://dataquality.ship-med.uni-greifswald.de/tutorials2.html) Package for R.
+
+## Result of contradiction checks:  
+```{r message=FALSE, warning=FALSE,echo=FALSE}
+
+smith_dq_report$long_format$con_contradictions$results[[1]]$SummaryPlot
+
+```
+
+### Contradiction checks as Table:
+
+```{r message=FALSE, warning=FALSE,echo=FALSE}
+
+smith_dq_report$long_format$con_contradictions$results[[1]]$SummaryTable
+
+```
+
+## Results of limit checks:  
+```{r message=FALSE, warning=FALSE,echo=FALSE}
+
+smith_dq_report$long_format$con_limit_deviations$results[[1]]$SummaryPlotList$ntprobnp
+
+```
+
+### Limit checks as Table:
+
+```{r message=FALSE, warning=FALSE,echo=FALSE,out.width="100%"}
+
+smith_dq_report$long_format$con_limit_deviations$results[[1]]$SummaryTable
+
+```
+
+# Information about distribution:  
+  
+```{r message=FALSE, warning=FALSE,echo=FALSE}
+## Age:
+#smith_dq_report$long_format$con_limit_deviations$results[[1]]$SummaryPlotList$birthdate
+
+```
+
+## Gender:  
+#### 1 = other | 2 = male | 3 = female  
+```{r message=FALSE, warning=FALSE,echo=FALSE}
+
+smith_dq_report$long_format$con_limit_deviations$results[[1]]$SummaryPlotList$gender
+
+```
+
+## LOINC Codes:  
+#### 1 = other | 2 = 33763-4 | 3 = 71425-3 | 4 = 33762-6 | 5 = 83107-3 | 6 =  83108-1 | 7 = 77622-9 | 8 = 77621-1 
+```{r message=FALSE, warning=FALSE,echo=FALSE}
+
+smith_dq_report$long_format$con_limit_deviations$results[[1]]$SummaryPlotList$NTproBNP.code
+
+```
+
+
+# Information about completness: 
+
+```{r message=FALSE, warning=FALSE,echo=FALSE,out.width="100%"}
+
+#Plot
+#smith_dq_report$long_format$com_item_missingness$results[[1]]$SummaryPlot
+smith_dq_report$long_format$com_item_missingness$results[[1]]$SummaryTable
+
+```
+
+# Further possible analysis with dataquieR:    
+```{r message=FALSE, warning=FALSE,echo=FALSE,out.width="100%"}
+
+smith_dq_report$app_mat$ApplicabilityPlot
+
+```

@@ -34,3 +34,6 @@ obs_profile <- "&_profile=https://www.medizininformatik-initiative.de/fhir/core/
 
 #Condition
 con_profile <- "&_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+
+#DQ Report
+dq_report <- TRUE
