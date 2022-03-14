@@ -1,5 +1,5 @@
 # Selectanfrage für den 6. Projectathon der MII: SMITH
-Datum: 19.01.22
+Datum: 14.03.22
 
 Autorin: [julia.palm@med.uni-jena.de](mailto:julia.palm@med.uni-jena.de).
 
@@ -109,18 +109,21 @@ Diese Tabelle enthält eine Kombination von Informationen aus der Patient Ressou
 
 |Variable             | Bedeutung|
 |---------------------|----------|
-|subject              | Logical id der Patient Ressource|
-|encounter.start      | Startzeitpunkt des Einrichtungskontakt-Encounters, der zeitlich zur NTproBNP-Messung gehört.|
-|encounter.end        | Stoppzeitpunkt des Einrichtungskontakt-Encounters, der zeitlich zur NTproBNP-Messung gehört.|
-|serviceType          | ServiceType (Stationsschlüssel) des Einrichtungskontakt-Encounters, der zeitlich zur NTproBNP-Messung gehört.|
-|NTproBNP.date        | Datum (effectiveDateTime) der Observation mit der NTproBNP-Messung.|
-|NTproBNP.value       | Wert (valueQuantity.value) der Observation mit der NTproBNP-Messung.|
-|NTproBNP.code        | Loinc-Code (code.coding.code) der Observation mit der NTproBNP-Messung.|
-|NTproBNP.codeSystem  | CodeSystem (code.coding.system) der Observation mit der NTproBNP-Messung.|
-|NTproBNP.unit        | Code der Einheit (valueQuantity.code) der NTproBNP-Messung.|
-|NTproBNP.unitSystem  | Codesystem der Einheit (valueQuantity.code) der NTproBNP-Messung.|
-|gender               | Geschlecht (gender) der Patient Ressource|
-|birthdate            | Geburtsdatum (birthDate) der Patient Ressource|
+|subject                            | Logical id der Patient Ressource|
+|encounter.start                    | Startzeitpunkt des Einrichtungskontakt-Encounters, der zeitlich zur NTproBNP-Messung gehört.|
+|encounter.end                      | Stoppzeitpunkt des Einrichtungskontakt-Encounters, der zeitlich zur NTproBNP-Messung gehört.|
+|serviceType                        | ServiceType (Stationsschlüssel) des Einrichtungskontakt-Encounters, der zeitlich zur NTproBNP-Messung gehört.|
+|NTproBNP.date                      | Datum (effectiveDateTime) der Observation mit der NTproBNP-Messung.|
+|NTproBNP.valueQuantity.value       | Numerischer Wert (valueQuantity.value) der Observation mit der NTproBNP-Messung.|
+|NTproBNP.valueQuantity.comparator  | Komparator (valueQuantity.comparator, falls vorhanden) der Observation mit der NTproBNP-Messung, welcher den numerischen Wert qualifiziert.|
+|NTproBNP.valueCodeableConcept.code | Kodierter Wert (valueCodeableConcept.code) der Observation mit der NTproBNP-Messung, für Fälle in denen die Messung nicht numerisch abgelegt wurde.|
+|NTproBNP.valueCodeableConcept.system | Codesystem zu NTproBNP.valueCodeableConcept.code|
+|NTproBNP.code                      | Loinc-Code (code.coding.code) der Observation mit der NTproBNP-Messung.|
+|NTproBNP.codeSystem                | CodeSystem (code.coding.system) der Observation mit der NTproBNP-Messung.|
+|NTproBNP.unit                      | Code der Einheit (valueQuantity.code) der NTproBNP-Messung.|
+|NTproBNP.unitSystem                | Codesystem der Einheit (valueQuantity.code) der NTproBNP-Messung.|
+|gender                             | Geschlecht (gender) der Patient Ressource|
+|birthdate                          | Geburtsdatum (birthDate) der Patient Ressource|
 
 **Diagnosen.csv**
 
@@ -275,13 +278,18 @@ Prinzipiell geht das Skript wie folgt vor:
 
 
 ## Changelog
+**14.03.2022**
+
+*Änderung*: Es werden nicht mehr nur numerische NTproBNP-Messwerte aus dem Element `Observation.valueQuantity.value` extrahiert, sondern zusätzlich auch die Elemente `Observation.valueQuantity.comparator`, `Observation.valueCodeableConcept.coding.code` und `Observation.valueCodeableConcept.coding.system`, um auch Messwerte abzudecken, die sich nicht in `valueQuantity.value` allein abbilden lassen, z.b. Angaben wie `<50`.
+Die Spalten, die diese Informationen insgesamt abdecken heißen `NTproBNP.valueQuantity.value`, `NTproBNP.valueQuantity.comparator`, `NTproBNP.valueCodeableConcept.code`, `NTproBNP.valueCodeableConcept.system`.
+
 **04.03.2022**
 
 *Änderung*: Zur Qualitätssicherung wird für jede NTproBNP-Messung nun auch der zugehörige Loinc-Code extrahiert, der zur Filterung der jeweiligen Observation verwendet wurde. Es gibt deshalb in Kohorte.csv nun zwei zusätzliche Spalten: NTproBNP.code und NTproBNP.codeSystem.
 
 **18.02.2022**
 
-*Änderung*: Das Skript schickt jetzt einige informative Nachrichten in die Konsole um das Debugging zu erleichertern. Die Ergebnisse ändern sich dadurch in keiner Weise.
+*Änderung*: Das Skript schickt jetzt einige informative Nachrichten in die Konsole um das Debugging zu erleichtern. Die Ergebnisse ändern sich dadurch in keiner Weise.
 
 **19.01.2022**
 
