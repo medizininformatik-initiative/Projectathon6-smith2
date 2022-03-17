@@ -278,7 +278,7 @@ enc_description <- fhir_table_description("Encounter",
                                                    diagnosis = "diagnosis/condition/reference",
                                                    diagnosis.use.code = "diagnosis/use/coding/code",
                                                    diagnosis.use.system = "diagnosis/use/coding/system",
-                                                   serviceType = "serviceType"))
+                                                   serviceType = "serviceType/coding/display"))
 
 message("Cracking ", length(encounter_bundles), " Encounter Bundles.\n")
 encounters <- fhir_crack(encounter_bundles, 

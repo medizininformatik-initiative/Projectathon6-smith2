@@ -1,5 +1,5 @@
 # Selectanfrage für den 6. Projectathon der MII: SMITH
-Datum: 14.03.22
+Datum: 17.03.22
 
 Autorin: [julia.palm@med.uni-jena.de](mailto:julia.palm@med.uni-jena.de).
 
@@ -212,7 +212,7 @@ Extrahierte Elemente:
 - `Encounter.subject.reference`
 - `Encounter.period.start `
 - `Encounter.period.end`
-- `Encounter.serviceType`
+- `Encounter.serviceType.coding.display`
 - `Encounter.diagnosis.use.coding.code`
 - `Encounter.diagnosis.use.coding.system`
 
@@ -278,6 +278,10 @@ Prinzipiell geht das Skript wie folgt vor:
 
 
 ## Changelog
+**17.03.2022**
+
+*Änderung*: In der Variable `serviceType` wird jetzt das Element `Encounter.serviceType.coding.display` extrahiert, anstatt wie vorher `Encounter.serviceType`, was nicht zu einem extrahierbaren einzelnen String geführt hätte. Die Form und der inhalt der Tabelle ändert sich dadurch nicht, nur der Inhalt der betreffenden Variable, die jetzt das enthält, was intendiert/kommuniziert war, statt eines `NA`.
+
 **14.03.2022**
 
 *Änderung*: Es werden nicht mehr nur numerische NTproBNP-Messwerte aus dem Element `Observation.valueQuantity.value` extrahiert, sondern zusätzlich auch die Elemente `Observation.valueQuantity.comparator`, `Observation.valueCodeableConcept.coding.code` und `Observation.valueCodeableConcept.coding.system`, um auch Messwerte abzudecken, die sich nicht in `valueQuantity.value` allein abbilden lassen, z.b. Angaben wie `<50`.
