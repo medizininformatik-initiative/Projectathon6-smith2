@@ -24,7 +24,7 @@ Es gibt zwei Möglichkeiten diese R-Skripte auszuführen: Direkt in R oder in ei
 Wenn die Abfrage auf einem Server laufen sollen, der sowohl konsentierte als auch nicht konsentierte Daten enthält, so kann durch setzen der Variable `filterConsent <- TRUE` dafür gesorgt werden, dass nur Daten von Patienten extrahiert werden, auf die eine Consent-Ressource mit einem `2.16.840.1.113883.3.1937.777.24.5.3.8` (*MDAT_wissenschaftlich_nutzen_EU_DSGVO_NIVEAU*) Code verweist.  
 Außerdem kann über die Variablen `enc_profile`, `obs_profile` und `con_profile` das Profil angepasst werden, für das beim Download gefiltert wird, bzw. durch `NULL` setzen dieser Variable die Prüfung eines Profils vollständig ausgeschaltet werden.
 
-4. Wenn die App über `runSmith_select.bat` (unter Windows) gestartet soll, muss in dieser der Pfad zur Datei `Rscript.exe` geprüft und ggf. angepasst werden (z.B. `C:\Program Files\R\R-4.0.4\bin\Rscript.exe`).
+4. Wenn das Skript über `runSmith_select.bat` (unter Windows) gestartet soll, muss in dieser der Pfad zur Datei `Rscript.exe` geprüft und ggf. angepasst werden (z.B. `C:\Program Files\R\R-4.0.4\bin\Rscript.exe`).
 
 
 #### Start des Skripts
@@ -34,7 +34,7 @@ Beim ersten Start des Skripts wird überprüft, ob die zur Ausführung notwendig
 **Unter Windows**: Mit der Batch-Datei `runSmith_select.bat`.
 Beim ersten Ausführen sollte diese ggf. als Administrator gestartet werden (über Eingabeaufforderung oder Rechtsklick), wenn die ggf. notwendigen Berechtigungen zum Nachinstallieren der R-Pakete sonst nicht vorhanden sind. Nach der ersten Installation reicht dann ein Doppelklick zum Starten.
 
-**Unter Linux**: Mit dem Shell-Skript `runSmith_selectr.sh`. Das Shell-Skript muss ausführbar sein und ggf. beim ersten Ausführen mittels `sudo` gestartet werden, wenn ein Nachinstallieren der R-Pakete außerhalb des User-Kontexts erforderlich ist.
+**Unter Linux**: Mit dem Shell-Skript `runSmith_select.sh`. Das Shell-Skript muss ausführbar sein und ggf. beim ersten Ausführen mittels `sudo` gestartet werden, wenn ein Nachinstallieren der R-Pakete außerhalb des User-Kontexts erforderlich ist.
 
 #### R/RStudio
 Durch Öffnen des R-Projektes (`Projectathon6-smith2.Rproj`) mit anschließendem Ausführen der Datei `smith_select.R` innerhalb von R/RStudio. Auch hier werden beim ersten Ausführen ggf. notwendige R-Pakete nachinstalliert.
@@ -44,7 +44,7 @@ Durch Öffnen des R-Projektes (`Projectathon6-smith2.Rproj`) mit anschließendem
 Um die Abfrage in einem Docker Container laufen zu lassen gibt es drei Möglichkeiten:
 
 **A) Image von DockerHub ziehen:**
-1. Git-Repository klonen: `git clone https://github.com/palmjulia/Projectathon6-smith2.git`
+1. Git-Repository klonen: `git clone https://github.com/medizininformatik-initiative/Projectathon6-smith2.git`
 2. Verzeichniswechsel in das lokale Repository: `cd Projectathon6-smith2`
 3. Konfiguration lokal anpassen: `./config.R.default` nach `./config.R` kopieren und anpassen 
 4. Image downloaden und Container starten: `docker run --name projectathon6-smith2 -v "$(pwd)/errors:/errors" -v "$(pwd)/Bundles:/Bundles" -v "$(pwd)/Ergebnisse:/Ergebnisse" -v "$(pwd)/config.R:/config.R" palmjulia/projectathon6-smith2`
@@ -52,7 +52,7 @@ Um die Abfrage in einem Docker Container laufen zu lassen gibt es drei Möglichk
 
 **B) Image bauen mit Docker Compose:**
 
-1. Git-Repository klonen: `git clone https://github.com/palmjulia/Projectathon6-smith2.git`
+1. Git-Repository klonen: `git clone https://github.com/medizininformatik-initiative/Projectathon6-smith2.git`
 2. Verzeichniswechsel in das lokale Repository: `cd Projectathon6-smith2`
 3. Konfiguration lokal anpassen: `./config.R.default` nach `./config.R` kopieren und anpassen 
 4. Image bauen und Container starten: `docker compose up -d`
@@ -61,7 +61,7 @@ Zum Stoppen des Containers `docker compose stop`. Um ihn erneut zu starten, `doc
 
 **C) Image bauen ohne Docker Compose**
 
-1. Git-Repository klonen: `git clone https://github.com/palmjulia/Projectathon6-smith2.git`
+1. Git-Repository klonen: `git clone https://github.com/medizininformatik-initiative/Projectathon6-smith2.git`
 2. Verzeichniswechsel in das lokale Repository: `cd Projectathon6-smith2`
 3. Image bauen: `docker build -t projectathon6-smith2 .` 
 4. Konfiguration lokal anpassen: `./config.R.default` nach `./config.R` kopieren und anpassen 
