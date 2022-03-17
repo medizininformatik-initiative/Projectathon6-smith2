@@ -13,18 +13,22 @@ Dieser Branch des Projektes Projectathon-smith2 enthält eine Beispielimplementi
 ## Funktionsweise
 Neben der Einstellung von Authentifizierungsdaten für den Server können Folgende Einstellungen in der Datei config.R vorgenommen werden:
 - `base`: Base-Url des FHIR-Servers
-- `provisionCode`: Der Code der Provision, deren Gültigkeit konkret beurteilt werden soll, z.B. `"2.16.840.1.113883.3.1937.777.24.5.3.8"` für "MDAT_wissenschaftlich_nutzen_EU_DSGVO_NIVEAU"
+- `date`: Das Datum der Auswertung/Datennutzung
+- `provision_erheben`: Der Code der Provision, die die Datenerhebung erlaubt, z.B. `"2.16.840.1.113883.3.1937.777.24.5.3.6"` für "MDAT_erheben"
+- `provision_nutzen`: Der Code der Provision, die die Datennutzung erlaubt, z.B. `"2.16.840.1.113883.3.1937.777.24.5.3.8"` für "MDAT_wissenschaftlich_nutzen_EU_DSGVO_NIVEAU"
 - `identifierSystem`: Das (vermutlich DIZ-spezifische) System aus dem der Identifier stammen soll, der aus den Encounter-Ressourcen extrahiert wird.
 
 Das Skript geht dann wie folgt vor:
 
 1) Downloade alle Consent-Ressourcen, die auf dem in `base` definierten FHIR-Server vorhanden sind. Beispiel-Request: `base/Consent`
 
-2) Extrahiere die Patienten-Id und den Gültigkeitszeitraum der in `provisionCode` definierten Provision.
+2) Extrahiere die Patienten-Id und die Gültigkeitszeiträume der in `provision_erheben` und `provision_nutzen` definierten Policies.
 
-3) Lade zu jedem Consent alle Einrichtungskontakt-Encounter, welche zu dem referenzierten Patienten gehören und mit dem Gültigkeitszeitraum aus 2) überlappen. Beispiel-Request: `base/Encounter?date=ge2020-09-01&date=le2050-08-31&subject=Patient/1&type=einrichtungskontakt`
+3) Filtere die Consents so, dass nur Consents übrig bleiben, bei denen das in `date` definierte Analyse-Datum im Gültigkeitszeitraum der in `provision_nutzen` definierten Policy liegt.
 
-4) Extrahiere die logical IDs der Patienten- und Encounter-Ressource(n), sowie den Identifier des Encounters aus `identifierSystem` und Start und Endzeitpunkt des Encounters (zu Validierungszwecken).
+4) Lade zu jedem der übrig gebliebenen Consents alle Einrichtungskontakt-Encounter, welche zu dem referenzierten Patienten gehören und mit dem Gültigkeitszeitraum aus der `provision_erheben` Policy überlappen. Beispiel-Request: `base/Encounter?date=ge2020-09-01&date=le2025-08-31&subject=Patient/1&type=einrichtungskontakt`
+
+5) Extrahiere die logical IDs der Patienten- und Encounter-Ressource(n), sowie den Identifier des Encounters aus `identifierSystem` und Start und Endzeitpunkt des Encounters (zu Validierungszwecken).
 
 5) Erzeuge eine csv-Tabelle "Ergebnisse/Consented_Encounters.csv" in der jede Zeile einen konsentierten Fall (Einrichtungskontakt-Encounter) darstellt, mit den folgenden Variablen/Spalten:
 
@@ -35,12 +39,13 @@ Das Skript geht dann wie folgt vor:
 |Encounter.identifier               | Identifier des Encounters in dem System, welches in `identifierSystem` in config.R angegeben wurde.|
 |Encounter.start                    | Startzeitpunkt des Encounters|
 |Encounter.end                      | Stoppzeitpunkt des Encounters|
-|provision.display                  | Der display-Wert der Provision, die in `provisionCode` in config.R angegeben wurde |
-|provision.start                    | Startzeitpunkt der Gültigkeit der gewählten Provision |
-|provision.end                      | Endzeitpunkt der Gültigkeit der gewählten Provision |
+|policy_erheben                     | Der display-Wert der Provision, die in `provision_erheben` in config.R angegeben wurde |
+|policy_erheben                     | Der display-Wert der Provision, die in `provision_nutzen` in config.R angegeben wurde |
+|provision.start                    | Startzeitpunkt der Gültigkeit der gewählten "erheben" Policy |
+|provision.end                      | Endzeitpunkt der Gültigkeit der gewählten "erheben" Policy |
 
 
-Basierend auf diesen Informationen können nun z.B. alle Ressourcen gezogen werden, die zu einem der konsentierten Encounter gehören oder die in das in Provision angegebene Zeitfenster fallen.
+Basierend auf diesen Informationen können nun z.B. alle Ressourcen gezogen werden, die zu einem der konsentierten Encounter gehören oder die in das in der "erheben"-Policy angegebene Zeitfenster fallen.
 
 ## Verwendung
 Es gibt zwei Möglichkeiten das R-Skript auszuführen: Direkt in R oder in einem Docker Container. Beide werden im folgenden beschrieben.

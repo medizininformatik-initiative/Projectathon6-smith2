@@ -9,6 +9,8 @@ if(file.exists("config.R")&&!dir.exists("config.R")){
   source("config.R.default")  
 }
 
+date <- as.Date(date)
+
 #create directory for results
 if(!dir.exists("Ergebnisse")){dir.create("Ergebnisse")}
 
@@ -36,7 +38,6 @@ consent_description <- fhir_table_description("Consent",
                                               cols = c(patient = "patient/reference",
                                                        provision.display = "provision/provision/code/coding/display",
                                                        provision.code = "provision/provision/code/coding/code",
-                                                       provision.system = "provision/provision/code/coding/system",
                                                        provision.start = "provision/provision/period/start",
                                                        provision.end = "provision/provision/period/end"))
 
@@ -62,17 +63,32 @@ consent <- fhir_melt(indexed_data_frame = consent,
 
 #remove indices
 consent <- fhir_rm_indices(consent, brackets = brackets)
-consent[,resource_identifier:=NULL]
 
-#keep only provision chosen in config
-consent <- consent[provision.code == provisionCode]
-
+#keep only provisions chosen in config
+consent <- consent[provision.code %in% c(provision_erheben, provision_nutzen)]
 
 
-#for each Consent, find Encounters that overlap with consent period and extract info
+#Filter for consents that allow "nutzen" at time of analysis
+consent[,c("provision.start", "provision.end"):=.(as.Date(provision.start), as.Date(provision.end))]
+consent_erheben <- consent[provision.code == provision_erheben]
+consent_nutzen <- consent[provision.code == provision_nutzen]
+
+consent <- merge.data.table(x = consent_erheben, 
+                         y = consent_nutzen[,.(provision.start, provision.end, provision.display, resource_identifier)],
+                         by = "resource_identifier", 
+                         all.x = TRUE,
+                         all.y = FALSE,
+                         suffixes = c("", ".nutzen"))
+
+consent <- consent[date > provision.start.nutzen & date < provision.end.nutzen]
+
+consent[,c("provision.start.nutzen", "provision.end.nutzen", "resource_identifier"):=NULL]
+
+#for each Consent, find Encounters that overlap with "erheben" consent period and extract info
 result <- data.table()
 
 for(i in 1:nrow(consent)){
+  
   #get encounters
   request <- fhir_url(url = base, 
                       resource = "Encounter",
@@ -118,9 +134,11 @@ for(i in 1:nrow(consent)){
   
   encounters <- encounters[Encounter.identifier.system==identifierSystem]
   encounters[,Encounter.identifier.system:=NULL]
-  
+
+
   #add consent info
-  encounters <- cbind(encounters, consent[,.(provision.display, provision.start, provision.end)])
+  encounters[, c("policy_erheben", "policy_nutzen") := .(consent[i]$provision.display, consent[i]$provision.display.nutzen)]
+  encounters <- cbind(encounters, consent[i, .(provision.start, provision.end)]) 
   result <- rbind(result, encounters)
 }
 

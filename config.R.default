@@ -19,8 +19,14 @@ password <- NULL #zB "mypassword"
 # Alternativ: Token für Bearer Token Authentifizierung
 token <- NULL #zB "mytoken"
 
-# Nach welcher Provision soll gefiltert werden?
-provisionCode <- "2.16.840.1.113883.3.1937.777.24.5.3.8" #MDAT_wissenschaftlich_nutzen_EU_DSGVO_NIVEAU
+# Was ist das Datum der Auswertung (=Datennutzung)?
+date <- "2022-03-17" 
+
+# Nach welcher "Erheben" Policy/Provision soll gefiltert werden?
+provision_erheben <- "2.16.840.1.113883.3.1937.777.24.5.3.6" #MDAT_erheben
+
+# Nach welcher "Nutzen" Policy/Provision soll gefiltern werden?
+provision_nutzen <- "2.16.840.1.113883.3.1937.777.24.5.3.8" #MDAT_wissenschaftlich_nutzen_EU_DSGVO_NIVEAU
 
 # Welches Encounter.identifier.system soll extrahiert werden?
 identifierSystem <- "http://medizininformatik-initiative.de/fhir/NamingSystem/Aufnahmenummer/MusterKrankenhaus"
