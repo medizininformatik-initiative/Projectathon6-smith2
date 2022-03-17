@@ -1,11 +1,9 @@
 version: "3.4"
 services:
-  projectathon6-smith2:
+  projectathon6-consent_extraction:
     build: .
     volumes:
-      - ./errors:/errors
-      - ./Bundles:/Bundles
       - ./Ergebnisse:/Ergebnisse
       - ./config.R:/config.R
 #      - ./localca.pem:/usr/local/share/ca-certificates/localca.crt
-    image: "projectathon6-smith2"  
+    image: "projectathon6-consent_extraction"  

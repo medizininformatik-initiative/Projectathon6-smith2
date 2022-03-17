@@ -9,6 +9,9 @@ if(file.exists("config.R")&&!dir.exists("config.R")){
   source("config.R.default")  
 }
 
+#create directory for results
+if(!dir.exists("Ergebnisse")){dir.create("Ergebnisse")}
+
 
 #If needed disable peer verification
 if(!ssl_verify_peer){httr::set_config(httr::config(ssl_verifypeer = 0L))}
@@ -122,4 +125,4 @@ for(i in 1:nrow(consent)){
 }
 
 #save results
-write.csv2(result, file = "Consented_Encounters.csv", row.names = FALSE)
+write.csv2(result, file = "Ergebnisse/Consented_Encounters.csv", row.names = FALSE)
