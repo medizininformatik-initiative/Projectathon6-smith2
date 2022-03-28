@@ -1,5 +1,5 @@
 # Selectanfrage für den 6. Projectathon der MII: SMITH
-Datum: 17.03.22
+Datum: 28.03.22
 
 Autorin: [julia.palm@med.uni-jena.de](mailto:julia.palm@med.uni-jena.de).
 
@@ -143,7 +143,9 @@ Diese Tabelle enthält alle Diagnosen der Patienten aus Kohorte.csv, die einen d
 |diagnosis.use.code         |Encounter.diagnosis.use.coding.code mit dem die Condition im zugehörigen Encounter beschrieben ist|
 |diagnosis.use.system         |Encounter.diagnosis.use.coding.system mit dem die Condition im zugehörigen Encounter beschrieben ist|
 
+**smith_select.log**
 
+Neben den Ergebnistabellen wird außerdem eine "smith_select.log"-Datei erzeugt, welche die Anzahl der extrahierten Fälle, Patienten und die Laufzeit des R-Skriptes dokumentiert. Das log-file muss nicht geteilt werden, es dient den DIZen nur als Hilfestellung für die Einschätzung von Laufzeiten und Ergebnismengen. 
 
 ### Bundles
 Dieser Ordner enthält die heruntergeladenen Bundles und kann der Kontrolle dienen, falls die Tabellen nicht aussehen wie erwartet.
@@ -278,22 +280,36 @@ Prinzipiell geht das Skript wie folgt vor:
 
 
 ## Changelog
+**28.03.2022**
+
+*Änderung*: Zusätzlich zu den Ergebnis-Tabellen wird nun ein Textfile "Ergebnisse/smith_select.log" erzeugt, welches die Anzahl der extrahierten Fälle, Patienten und die Laufzeit des R-Skriptes dokumentiert. Das log-file muss nicht geteilt werden, es dient den DIZen nur als Hilfestellung für die Einschätzung von Laufzeiten und Ergebnismengen. 
+
+----------------------------
+
 **17.03.2022**
 
 *Änderung*: In der Variable `serviceType` wird jetzt das Element `Encounter.serviceType.coding.display` extrahiert, anstatt wie vorher `Encounter.serviceType`, was nicht zu einem extrahierbaren einzelnen String geführt hätte. Die Form und der inhalt der Tabelle ändert sich dadurch nicht, nur der Inhalt der betreffenden Variable, die jetzt das enthält, was intendiert/kommuniziert war, statt eines `NA`.
+
+----------------------------
 
 **14.03.2022**
 
 *Änderung*: Es werden nicht mehr nur numerische NTproBNP-Messwerte aus dem Element `Observation.valueQuantity.value` extrahiert, sondern zusätzlich auch die Elemente `Observation.valueQuantity.comparator`, `Observation.valueCodeableConcept.coding.code` und `Observation.valueCodeableConcept.coding.system`, um auch Messwerte abzudecken, die sich nicht in `valueQuantity.value` allein abbilden lassen, z.b. Angaben wie `<50`.
 Die Spalten, die diese Informationen insgesamt abdecken heißen `NTproBNP.valueQuantity.value`, `NTproBNP.valueQuantity.comparator`, `NTproBNP.valueCodeableConcept.code`, `NTproBNP.valueCodeableConcept.system`.
 
+----------------------------
+
 **04.03.2022**
 
 *Änderung*: Zur Qualitätssicherung wird für jede NTproBNP-Messung nun auch der zugehörige Loinc-Code extrahiert, der zur Filterung der jeweiligen Observation verwendet wurde. Es gibt deshalb in Kohorte.csv nun zwei zusätzliche Spalten: NTproBNP.code und NTproBNP.codeSystem.
 
+----------------------------
+
 **18.02.2022**
 
 *Änderung*: Das Skript schickt jetzt einige informative Nachrichten in die Konsole um das Debugging zu erleichtern. Die Ergebnisse ändern sich dadurch in keiner Weise.
+
+----------------------------
 
 **19.01.2022**
 
@@ -301,11 +317,15 @@ Die Spalten, die diese Informationen insgesamt abdecken heißen `NTproBNP.valueQ
 
 *Erklärung*: Damit ist es jetzt irrelevant, ob der Encounter auf die Condition verlinkt oder die Condition auf den Encounter verlinkt. Das Skript funktioniert, solange mindestens eine der Richtungen gegeben ist. Diese Änderung wurde implementiert, weil sich herausstellt, dass die Linkrichtung in den verschiedenen DIZen zu heterogen ist, als das man sich auf eine von beiden verlassen könnte.
 
+----------------------------
+
 **14.01.2022**
 
 *Änderung*: Typo in `smith_select.R` korrigiert.
 
 *Erklärung* Korrigiert Fehler in der zeitlichen Relation im merge-Befehl in Z301. Sollte keine oder maximal geringfügigen Einfluss auf die Ergebnisse haben, da im Folgenden sowieso nochmal nach korrektem Zeitbezug gefiltert wird.
+
+----------------------------
 
 **13.12.21**
 

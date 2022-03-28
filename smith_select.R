@@ -1,5 +1,5 @@
 ### Preparation
-
+start <- Sys.time()
 #load/install a packages
 source("install_R_packages.R")
 
@@ -393,4 +393,16 @@ if(nrow(conditions)>0){conditions <- conditions[encounter.id %in% cohort$encount
 if(!dir.exists("Ergebnisse")){dir.create("Ergebnisse")}
 write.csv2(cohort, paste0("Ergebnisse/Kohorte.csv"))
 write.csv2(conditions, paste0("Ergebnisse/Diagnosen.csv"))
+
+###logging
+runtime <- Sys.time() - start
+
+con <- file("Ergebnisse/smith_select.log")
+write(paste0(
+  "smith_select.R finished at ", Sys.time(), ".\n",
+  "Extracted ", length(cohort$encounter.id), " Encounters based on ", length(unique(cohort$subject)), " Patients.\n", 
+  "R script execution took ", round(runtime, 2), " ", attr(runtime, "units"), "."
+  ), file = con)
+close(con)
+
 
