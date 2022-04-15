@@ -1,5 +1,5 @@
 ### Preparation
-
+start <- Sys.time()
 #load/install a packages
 source("install_R_packages.R")
 
@@ -55,7 +55,10 @@ fhir_save(bundles = obs_bundles, directory = "Bundles/Observations")
 obs_description <- fhir_table_description("Observation", 
                                           cols = c(NTproBNP.date = "effectiveDateTime",
                                                    subject = "subject/reference",
-                                                   NTproBNP.value = "valueQuantity/value",
+                                                   NTproBNP.valueQuantity.value = "valueQuantity/value",
+                                                   NTproBNP.valueQuantity.comparator = "valueQuantity/comparator",
+                                                   NTproBNP.valueCodeableConcept.code = "valueCodeableConcept/coding/code",
+                                                   NTproBNP.valueCodeableConcept.system = "valueCodeableConcept/coding/system",
                                                    NTproBNP.code = "code/coding/code",
                                                    NTproBNP.codeSystem = "code/coding/system",
                                                    NTproBNP.unit = "valueQuantity/code",
@@ -275,7 +278,7 @@ enc_description <- fhir_table_description("Encounter",
                                                    diagnosis = "diagnosis/condition/reference",
                                                    diagnosis.use.code = "diagnosis/use/coding/code",
                                                    diagnosis.use.system = "diagnosis/use/coding/system",
-                                                   serviceType = "serviceType"))
+                                                   serviceType = "serviceType/coding/display"))
 
 message("Cracking ", length(encounter_bundles), " Encounter Bundles.\n")
 encounters <- fhir_crack(encounter_bundles, 
@@ -395,3 +398,15 @@ write.csv2(conditions, paste0("Ergebnisse/Diagnosen.csv"))
 if(dq_report) {
   rmarkdown::render("smith_dq_report.RMD", output_format = "html_document", output_file = "Ergebnisse/DQ-Report.html")
 }
+###logging
+runtime <- Sys.time() - start
+
+con <- file("Ergebnisse/smith_select.log")
+write(paste0(
+  "smith_select.R finished at ", Sys.time(), ".\n",
+  "Extracted ", length(cohort$encounter.id), " Encounters based on ", length(unique(cohort$subject)), " Patients.\n", 
+  "R script execution took ", round(runtime, 2), " ", attr(runtime, "units"), "."
+  ), file = con)
+close(con)
+
+

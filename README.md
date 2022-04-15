@@ -1,5 +1,5 @@
 # Selectanfrage für den 6. Projectathon der MII: SMITH
-Datum: 19.01.22
+Datum: 28.03.22
 
 Autorin: [julia.palm@med.uni-jena.de](mailto:julia.palm@med.uni-jena.de).
 
@@ -24,7 +24,7 @@ Es gibt zwei Möglichkeiten diese R-Skripte auszuführen: Direkt in R oder in ei
 Wenn die Abfrage auf einem Server laufen sollen, der sowohl konsentierte als auch nicht konsentierte Daten enthält, so kann durch setzen der Variable `filterConsent <- TRUE` dafür gesorgt werden, dass nur Daten von Patienten extrahiert werden, auf die eine Consent-Ressource mit einem `2.16.840.1.113883.3.1937.777.24.5.3.8` (*MDAT_wissenschaftlich_nutzen_EU_DSGVO_NIVEAU*) Code verweist.  
 Außerdem kann über die Variablen `enc_profile`, `obs_profile` und `con_profile` das Profil angepasst werden, für das beim Download gefiltert wird, bzw. durch `NULL` setzen dieser Variable die Prüfung eines Profils vollständig ausgeschaltet werden.
 
-4. Wenn die App über `runSmith_select.bat` (unter Windows) gestartet soll, muss in dieser der Pfad zur Datei `Rscript.exe` geprüft und ggf. angepasst werden (z.B. `C:\Program Files\R\R-4.0.4\bin\Rscript.exe`).
+4. Wenn das Skript über `runSmith_select.bat` (unter Windows) gestartet soll, muss in dieser der Pfad zur Datei `Rscript.exe` geprüft und ggf. angepasst werden (z.B. `C:\Program Files\R\R-4.0.4\bin\Rscript.exe`).
 
 
 #### Start des Skripts
@@ -34,7 +34,7 @@ Beim ersten Start des Skripts wird überprüft, ob die zur Ausführung notwendig
 **Unter Windows**: Mit der Batch-Datei `runSmith_select.bat`.
 Beim ersten Ausführen sollte diese ggf. als Administrator gestartet werden (über Eingabeaufforderung oder Rechtsklick), wenn die ggf. notwendigen Berechtigungen zum Nachinstallieren der R-Pakete sonst nicht vorhanden sind. Nach der ersten Installation reicht dann ein Doppelklick zum Starten.
 
-**Unter Linux**: Mit dem Shell-Skript `runSmith_selectr.sh`. Das Shell-Skript muss ausführbar sein und ggf. beim ersten Ausführen mittels `sudo` gestartet werden, wenn ein Nachinstallieren der R-Pakete außerhalb des User-Kontexts erforderlich ist.
+**Unter Linux**: Mit dem Shell-Skript `runSmith_select.sh`. Das Shell-Skript muss ausführbar sein und ggf. beim ersten Ausführen mittels `sudo` gestartet werden, wenn ein Nachinstallieren der R-Pakete außerhalb des User-Kontexts erforderlich ist.
 
 #### R/RStudio
 Durch Öffnen des R-Projektes (`Projectathon6-smith2.Rproj`) mit anschließendem Ausführen der Datei `smith_select.R` innerhalb von R/RStudio. Auch hier werden beim ersten Ausführen ggf. notwendige R-Pakete nachinstalliert.
@@ -44,7 +44,7 @@ Durch Öffnen des R-Projektes (`Projectathon6-smith2.Rproj`) mit anschließendem
 Um die Abfrage in einem Docker Container laufen zu lassen gibt es drei Möglichkeiten:
 
 **A) Image von DockerHub ziehen:**
-1. Git-Repository klonen: `git clone https://github.com/palmjulia/Projectathon6-smith2.git`
+1. Git-Repository klonen: `git clone https://github.com/medizininformatik-initiative/Projectathon6-smith2.git`
 2. Verzeichniswechsel in das lokale Repository: `cd Projectathon6-smith2`
 3. Konfiguration lokal anpassen: `./config.R.default` nach `./config.R` kopieren und anpassen 
 4. Image downloaden und Container starten: `docker run --name projectathon6-smith2 -v "$(pwd)/errors:/errors" -v "$(pwd)/Bundles:/Bundles" -v "$(pwd)/Ergebnisse:/Ergebnisse" -v "$(pwd)/config.R:/config.R" palmjulia/projectathon6-smith2`
@@ -52,7 +52,7 @@ Um die Abfrage in einem Docker Container laufen zu lassen gibt es drei Möglichk
 
 **B) Image bauen mit Docker Compose:**
 
-1. Git-Repository klonen: `git clone https://github.com/palmjulia/Projectathon6-smith2.git`
+1. Git-Repository klonen: `git clone https://github.com/medizininformatik-initiative/Projectathon6-smith2.git`
 2. Verzeichniswechsel in das lokale Repository: `cd Projectathon6-smith2`
 3. Konfiguration lokal anpassen: `./config.R.default` nach `./config.R` kopieren und anpassen 
 4. Image bauen und Container starten: `docker compose up -d`
@@ -61,7 +61,7 @@ Zum Stoppen des Containers `docker compose stop`. Um ihn erneut zu starten, `doc
 
 **C) Image bauen ohne Docker Compose**
 
-1. Git-Repository klonen: `git clone https://github.com/palmjulia/Projectathon6-smith2.git`
+1. Git-Repository klonen: `git clone https://github.com/medizininformatik-initiative/Projectathon6-smith2.git`
 2. Verzeichniswechsel in das lokale Repository: `cd Projectathon6-smith2`
 3. Image bauen: `docker build -t projectathon6-smith2 .` 
 4. Konfiguration lokal anpassen: `./config.R.default` nach `./config.R` kopieren und anpassen 
@@ -109,18 +109,21 @@ Diese Tabelle enthält eine Kombination von Informationen aus der Patient Ressou
 
 |Variable             | Bedeutung|
 |---------------------|----------|
-|subject              | Logical id der Patient Ressource|
-|encounter.start      | Startzeitpunkt des Einrichtungskontakt-Encounters, der zeitlich zur NTproBNP-Messung gehört.|
-|encounter.end        | Stoppzeitpunkt des Einrichtungskontakt-Encounters, der zeitlich zur NTproBNP-Messung gehört.|
-|serviceType          | ServiceType (Stationsschlüssel) des Einrichtungskontakt-Encounters, der zeitlich zur NTproBNP-Messung gehört.|
-|NTproBNP.date        | Datum (effectiveDateTime) der Observation mit der NTproBNP-Messung.|
-|NTproBNP.value       | Wert (valueQuantity.value) der Observation mit der NTproBNP-Messung.|
-|NTproBNP.code        | Loinc-Code (code.coding.code) der Observation mit der NTproBNP-Messung.|
-|NTproBNP.codeSystem  | CodeSystem (code.coding.system) der Observation mit der NTproBNP-Messung.|
-|NTproBNP.unit        | Code der Einheit (valueQuantity.code) der NTproBNP-Messung.|
-|NTproBNP.unitSystem  | Codesystem der Einheit (valueQuantity.code) der NTproBNP-Messung.|
-|gender               | Geschlecht (gender) der Patient Ressource|
-|birthdate            | Geburtsdatum (birthDate) der Patient Ressource|
+|subject                            | Logical id der Patient Ressource|
+|encounter.start                    | Startzeitpunkt des Einrichtungskontakt-Encounters, der zeitlich zur NTproBNP-Messung gehört.|
+|encounter.end                      | Stoppzeitpunkt des Einrichtungskontakt-Encounters, der zeitlich zur NTproBNP-Messung gehört.|
+|serviceType                        | ServiceType (Stationsschlüssel) des Einrichtungskontakt-Encounters, der zeitlich zur NTproBNP-Messung gehört.|
+|NTproBNP.date                      | Datum (effectiveDateTime) der Observation mit der NTproBNP-Messung.|
+|NTproBNP.valueQuantity.value       | Numerischer Wert (valueQuantity.value) der Observation mit der NTproBNP-Messung.|
+|NTproBNP.valueQuantity.comparator  | Komparator (valueQuantity.comparator, falls vorhanden) der Observation mit der NTproBNP-Messung, welcher den numerischen Wert qualifiziert.|
+|NTproBNP.valueCodeableConcept.code | Kodierter Wert (valueCodeableConcept.code) der Observation mit der NTproBNP-Messung, für Fälle in denen die Messung nicht numerisch abgelegt wurde.|
+|NTproBNP.valueCodeableConcept.system | Codesystem zu NTproBNP.valueCodeableConcept.code|
+|NTproBNP.code                      | Loinc-Code (code.coding.code) der Observation mit der NTproBNP-Messung.|
+|NTproBNP.codeSystem                | CodeSystem (code.coding.system) der Observation mit der NTproBNP-Messung.|
+|NTproBNP.unit                      | Code der Einheit (valueQuantity.code) der NTproBNP-Messung.|
+|NTproBNP.unitSystem                | Codesystem der Einheit (valueQuantity.code) der NTproBNP-Messung.|
+|gender                             | Geschlecht (gender) der Patient Ressource|
+|birthdate                          | Geburtsdatum (birthDate) der Patient Ressource|
 
 **Diagnosen.csv**
 
@@ -140,7 +143,9 @@ Diese Tabelle enthält alle Diagnosen der Patienten aus Kohorte.csv, die einen d
 |diagnosis.use.code         |Encounter.diagnosis.use.coding.code mit dem die Condition im zugehörigen Encounter beschrieben ist|
 |diagnosis.use.system         |Encounter.diagnosis.use.coding.system mit dem die Condition im zugehörigen Encounter beschrieben ist|
 
+**smith_select.log**
 
+Neben den Ergebnistabellen wird außerdem eine "smith_select.log"-Datei erzeugt, welche die Anzahl der extrahierten Fälle, Patienten und die Laufzeit des R-Skriptes dokumentiert. Das log-file muss nicht geteilt werden, es dient den DIZen nur als Hilfestellung für die Einschätzung von Laufzeiten und Ergebnismengen. 
 
 ### Bundles
 Dieser Ordner enthält die heruntergeladenen Bundles und kann der Kontrolle dienen, falls die Tabellen nicht aussehen wie erwartet.
@@ -209,7 +214,7 @@ Extrahierte Elemente:
 - `Encounter.subject.reference`
 - `Encounter.period.start `
 - `Encounter.period.end`
-- `Encounter.serviceType`
+- `Encounter.serviceType.coding.display`
 - `Encounter.diagnosis.use.coding.code`
 - `Encounter.diagnosis.use.coding.system`
 
@@ -278,14 +283,36 @@ Prinzipiell geht das Skript wie folgt vor:
 **11.03.2022**
 
 *Änderung*: Branch für Checks zur Qualitätssicherung mit DQ-Report Skript und zugehörigen Metadaten.
+**28.03.2022**
+
+*Änderung*: Zusätzlich zu den Ergebnis-Tabellen wird nun ein Textfile "Ergebnisse/smith_select.log" erzeugt, welches die Anzahl der extrahierten Fälle, Patienten und die Laufzeit des R-Skriptes dokumentiert. Das log-file muss nicht geteilt werden, es dient den DIZen nur als Hilfestellung für die Einschätzung von Laufzeiten und Ergebnismengen. 
+
+----------------------------
+
+**17.03.2022**
+
+*Änderung*: In der Variable `serviceType` wird jetzt das Element `Encounter.serviceType.coding.display` extrahiert, anstatt wie vorher `Encounter.serviceType`, was nicht zu einem extrahierbaren einzelnen String geführt hätte. Die Form und der inhalt der Tabelle ändert sich dadurch nicht, nur der Inhalt der betreffenden Variable, die jetzt das enthält, was intendiert/kommuniziert war, statt eines `NA`.
+
+----------------------------
+
+**14.03.2022**
+
+*Änderung*: Es werden nicht mehr nur numerische NTproBNP-Messwerte aus dem Element `Observation.valueQuantity.value` extrahiert, sondern zusätzlich auch die Elemente `Observation.valueQuantity.comparator`, `Observation.valueCodeableConcept.coding.code` und `Observation.valueCodeableConcept.coding.system`, um auch Messwerte abzudecken, die sich nicht in `valueQuantity.value` allein abbilden lassen, z.b. Angaben wie `<50`.
+Die Spalten, die diese Informationen insgesamt abdecken heißen `NTproBNP.valueQuantity.value`, `NTproBNP.valueQuantity.comparator`, `NTproBNP.valueCodeableConcept.code`, `NTproBNP.valueCodeableConcept.system`.
+
+----------------------------
 
 **04.03.2022**
 
 *Änderung*: Zur Qualitätssicherung wird für jede NTproBNP-Messung nun auch der zugehörige Loinc-Code extrahiert, der zur Filterung der jeweiligen Observation verwendet wurde. Es gibt deshalb in Kohorte.csv nun zwei zusätzliche Spalten: NTproBNP.code und NTproBNP.codeSystem.
 
+----------------------------
+
 **18.02.2022**
 
-*Änderung*: Das Skript schickt jetzt einige informative Nachrichten in die Konsole um das Debugging zu erleichertern. Die Ergebnisse ändern sich dadurch in keiner Weise.
+*Änderung*: Das Skript schickt jetzt einige informative Nachrichten in die Konsole um das Debugging zu erleichtern. Die Ergebnisse ändern sich dadurch in keiner Weise.
+
+----------------------------
 
 **19.01.2022**
 
@@ -293,11 +320,15 @@ Prinzipiell geht das Skript wie folgt vor:
 
 *Erklärung*: Damit ist es jetzt irrelevant, ob der Encounter auf die Condition verlinkt oder die Condition auf den Encounter verlinkt. Das Skript funktioniert, solange mindestens eine der Richtungen gegeben ist. Diese Änderung wurde implementiert, weil sich herausstellt, dass die Linkrichtung in den verschiedenen DIZen zu heterogen ist, als das man sich auf eine von beiden verlassen könnte.
 
+----------------------------
+
 **14.01.2022**
 
 *Änderung*: Typo in `smith_select.R` korrigiert.
 
 *Erklärung* Korrigiert Fehler in der zeitlichen Relation im merge-Befehl in Z301. Sollte keine oder maximal geringfügigen Einfluss auf die Ergebnisse haben, da im Folgenden sowieso nochmal nach korrektem Zeitbezug gefiltert wird.
+
+----------------------------
 
 **13.12.21**
 
