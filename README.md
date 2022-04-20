@@ -280,9 +280,12 @@ Prinzipiell geht das Skript wie folgt vor:
 
 
 ## Changelog
-**11.03.2022**
+**20.04.2022**
 
-*Änderung*: Branch für Checks zur Qualitätssicherung mit DQ-Report Skript und zugehörigen Metadaten.
+*Änderung*: Anpassung der DQ-Skripte für die weiteren extrahierten Element. Logging für Laufzeit der DQ Skripte. Verbesserte Fehlerbehandlung beim Einlesen der Kohorte ins DQ-Skript. Erweiterung der DQ-Skripte um Missing-Codes (Missingness).
+
+----------------------------
+
 **28.03.2022**
 
 *Änderung*: Zusätzlich zu den Ergebnis-Tabellen wird nun ein Textfile "Ergebnisse/smith_select.log" erzeugt, welches die Anzahl der extrahierten Fälle, Patienten und die Laufzeit des R-Skriptes dokumentiert. Das log-file muss nicht geteilt werden, es dient den DIZen nur als Hilfestellung für die Einschätzung von Laufzeiten und Ergebnismengen. 
@@ -299,6 +302,12 @@ Prinzipiell geht das Skript wie folgt vor:
 
 *Änderung*: Es werden nicht mehr nur numerische NTproBNP-Messwerte aus dem Element `Observation.valueQuantity.value` extrahiert, sondern zusätzlich auch die Elemente `Observation.valueQuantity.comparator`, `Observation.valueCodeableConcept.coding.code` und `Observation.valueCodeableConcept.coding.system`, um auch Messwerte abzudecken, die sich nicht in `valueQuantity.value` allein abbilden lassen, z.b. Angaben wie `<50`.
 Die Spalten, die diese Informationen insgesamt abdecken heißen `NTproBNP.valueQuantity.value`, `NTproBNP.valueQuantity.comparator`, `NTproBNP.valueCodeableConcept.code`, `NTproBNP.valueCodeableConcept.system`.
+
+----------------------------
+
+**11.03.2022**
+
+*Änderung*: Branch für Checks zur Qualitätssicherung mit DQ-Report Skript und zugehörigen Metadaten.
 
 ----------------------------
 

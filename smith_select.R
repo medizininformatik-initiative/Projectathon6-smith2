@@ -394,18 +394,24 @@ if(!dir.exists("Ergebnisse")){dir.create("Ergebnisse")}
 write.csv2(cohort, paste0("Ergebnisse/Kohorte.csv"))
 write.csv2(conditions, paste0("Ergebnisse/Diagnosen.csv"))
 
+# time for logging
+runtime <- Sys.time() - start
+start <- Sys.time()
+
 ##DQ Report
 if(dq_report) {
   rmarkdown::render("smith_dq_report.RMD", output_format = "html_document", output_file = "Ergebnisse/DQ-Report.html")
 }
+
 ###logging
-runtime <- Sys.time() - start
+runtime_DQ <- Sys.time() - start
 
 con <- file("Ergebnisse/smith_select.log")
 write(paste0(
   "smith_select.R finished at ", Sys.time(), ".\n",
   "Extracted ", length(cohort$encounter.id), " Encounters based on ", length(unique(cohort$subject)), " Patients.\n", 
-  "R script execution took ", round(runtime, 2), " ", attr(runtime, "units"), "."
+  "R script execution took ", round(runtime, 2), " ", attr(runtime, "units"), ".\n",
+  "Data Quality script execution took ", round(runtime_DQ, 2), " ", attr(runtime, "units"), ".\n"
   ), file = con)
 close(con)
 
