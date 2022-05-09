@@ -54,28 +54,13 @@ value_labels <- sapply(value_labels, get_labels)
 
 #set up missing codes
 missing_unknown <- missings_report$CODE_VALUE[2]
-missing_float <- missings_report$CODE_VALUE[3]
-missing_integer <- missings_report$CODE_VALUE[4]
-missing_datetime <- missings_report$CODE_VALUE[5]
-missing_string <- missings_report$CODE_VALUE[6]
-missing_label <- missings_report$CODE_VALUE[7]
+missing_label <- missings_report$CODE_VALUE[3] #item has correct type but is missing in value labels
 
 
 ### Transform to dataquiR format -------------------
 
 # function that sets integer values according to labels and missing codes
 apply_labels <- function(vector, labels) {
-  # encode unknown labels with 'other'
-  # 'other' has to be first in list!
-  not_found <- missing_label
-  found_offset <- 0
-  # if 'other' is a meaningful label use missing code instead
-  # see DQ_metadata\\missing_codes.csv
-  if(labels[1] == "other") { 
-    labels <- labels[-1]
-    not_found <- 1
-    found_offset <- 1
-  }
   
   # unify casing, trim whitespace
   vector <- tolower(vector)
@@ -85,23 +70,25 @@ apply_labels <- function(vector, labels) {
   
   r <- NULL
   for(item in vector) {
-    if(item == "") item <- missing_unknown  
+    # default assumes value of item is missing in value labels
+    value <- missing_label
+    # if item is whitespace or NA set value to NA for correct dataquiR missingness
+    if(item == "" || is.na(item) ) value <- NA  
     else {
       i <- 0
-      item_start <- item
       for(l in labels) {
         i <- i + 1
-        if(item == l) item <- i + found_offset
+        # if item is found in labels set value to corresponding integer
+        if(item == l) value <- i
       }
     }
-    if(item == item_start) item <- not_found
-    r <- c(r,item)
+    r <- c(r,value)
   }
   
   return(r)
 }
 
-#apply labels and fix typing per column
+#apply labels and fix typing per column - missmatched typing is returned as NA (NOT as missing code)
 cohort_report$NTproBNP.date <- as.Date(cohort_report$NTproBNP.date)
 cohort_report$NTproBNP.valueQuantity.value <- as.double(cohort_report$NTproBNP.valueQuantity.value)
 cohort_report$NTproBNP.code <- as.integer( apply_labels(cohort_report$NTproBNP.code, value_labels$NTproBNP.code) )
@@ -197,6 +184,20 @@ smith_dq_report$long_format$con_limit_deviations$results[[1]]$SummaryPlotList$NT
 #Plot
 #smith_dq_report$long_format$com_item_missingness$results[[1]]$SummaryPlot
 smith_dq_report$long_format$com_item_missingness$results[[1]]$SummaryTable
+
+
+```
+
+# Plot of completness with missing codes:
+#### MISSING 9991100: Missing - reason unknown
+#### MISSING 9991300: Deleted - not in VALUE_LABELS
+Regarding completeness and missing codes:   
+If a field has the wrong datatype it is evaluated to NA and tracked under Sysmiss in the completeness table. If a field has the correct typing but an undefined value (for example any string as a gender other than 'male', 'female', 'other', 'unknown') the missing code 9991300 is used instead.
+```{r message=FALSE, warning=FALSE,echo=FALSE,out.width="100%"}
+
+#Plot
+smith_dq_report$long_format$com_item_missingness$results[[1]]$SummaryPlot
+
 
 ```
 

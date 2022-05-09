@@ -280,9 +280,15 @@ Prinzipiell geht das Skript wie folgt vor:
 
 
 ## Changelog
+**09.05.2022**
+
+*Änderung*: Überarbeitung von Missingness und Completness in den DQ-Skripten. Whitespace, NA, Null Werte werden in Completness behandelt. Typfehler werden auf NA abgebildet. Missingness behandelt unbekannte Werte mit korrektem Typ (zum Beispiel andere Strings als 'male', 'female', 'other', 'unknown' für gender).  
+
+----------------------------
+
 **20.04.2022**
 
-*Änderung*: Anpassung der DQ-Skripte für die weiteren extrahierten Element. Logging für Laufzeit der DQ Skripte. Verbesserte Fehlerbehandlung beim Einlesen der Kohorte ins DQ-Skript. Erweiterung der DQ-Skripte um Missing-Codes (Missingness).
+*Änderung*: Anpassung der DQ-Skripte für die weiteren extrahierten Element. Logging für Laufzeit der DQ Skripte. Verbesserte Fehlerbehandlung beim Einlesen der Kohorte ins DQ-Skript. Erweiterung der DQ-Skripte um Missing-Codes (Missingness).  
 
 ----------------------------
 
