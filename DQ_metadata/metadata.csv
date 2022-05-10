@@ -6,6 +6,6 @@ NTproBNP.codeSystem,NTproBNP.codeSystem,integer,1 = other | 2 = http://loinc.org
 NTproBNP.unit,NTproBNP.unit,integer,1 = other | 2 = pg/mL,9991100 | 9991300,NA,,NA,,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,
 NTproBNP.unitSystem,NTproBNP.unitSystem,integer,1 = other | 2 = http://unitsofmeasure.org ,9991100 | 9991300,NA,,NA,,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,
 gender,gender,integer,1 = male | 2 = female | 3 = other | 4 = unknown,9991100 | 9991300,NA,,NA,,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,
-birthdate,birthdate,datetime,,9991100,NA,,NA,,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,
+birthdate,age,integer,,9991100 | 9991200,NA,,NA,,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,
 encounter.start,encounter.start,datetime,,9991100,NA,,NA,1001,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,
 encounter.end,encounter.end,datetime,,9991100,NA,,NA,1001 | 1002,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,
